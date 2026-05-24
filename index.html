@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Формула 1 — слайдер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- навигационная панель -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <img class="logo" src="./images/f1 logo.png" alt="F1 Logo" onerror="this.onerror=null; this.style.opacity='0.5'; this.alt='Logo not found';">
+                <span class="brand-title">ФОРМУЛА 1</span>
+            </div>
+            <button class="hamburger" id="hamburgerBtn" aria-label="Меню">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#">Главная</a></li>
+                <li><a href="#">Гонки</a></li>
+                <li><a href="#">Команды</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Огромная надпись "ФОРМУЛА 1" -->
+        <div class="hero-title">
+            ФОРМУЛА 1
+        </div>
+
+        <!-- Слайдер -->
+        <div class="slider-container">
+            <button class="slider-btn prev-btn" id="prevBtn">&#10094;</button>
+            <div class="slider-track" id="sliderTrack">
+                <!-- Картинки будут подставлены JS, но прописываем сразу для надежности -->
+            </div>
+            <button class="slider-btn next-btn" id="nextBtn">&#10095;</button>
+        </div>
+        <!-- Индикаторы (опционально, для удобства) -->
+        <div class="slider-dots" id="sliderDots"></div>
+
+        <div id="race-results-container"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
