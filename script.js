@@ -212,4 +212,117 @@
             console.warn('⚠️ Логотип не найден: ./images/f1 logo.png');
         });
     }
+
+
+
+
+    // --- Логика обратного отсчета до следующей гонки ---
+async function loadNextRaceData() {
+    const container = document.getElementById('next-race-countdown');
+    if (!container) return;
+
+    try {
+        // 1. Запрашиваем календарь гонок на 2026 год
+        const response = await fetch('https://api.jolpi.ca/ergast/f1/2026.json');
+        if (!response.ok) throw new Error('Ошибка загрузки календаря');
+        
+        const data = await response.json();
+        const races = data.MRData.RaceTable.Races;
+        if (!races || races.length === 0) throw new Error('Нет данных о гонках');
+
+        // 2. Находим следующую гонку
+        const now = new Date();
+        let nextRace = null;
+        for (const race of races) {
+            const raceDate = new Date(race.date);
+            // Сравниваем только дату, без учёта времени
+            if (raceDate >= now) {
+                nextRace = race;
+                break;
+            }
+        }
+        
+        if (!nextRace) {
+            container.innerHTML = '<div class="countdown-card">Сезон 2026 года завершён. До следующего сезона ещё много времени!</div>';
+            return;
+        }
+
+        // 3. Показываем информацию о гонке и запускаем таймер
+        displayRaceInfo(nextRace, container);
+        startCountdown(nextRace.date, container);
+        
+    } catch (error) {
+        console.error('Ошибка получения данных о следующей гонке:', error);
+        container.innerHTML = '<div class="countdown-card error">⚠️ Не удалось загрузить информацию о следующей гонке.</div>';
+    }
+}
+
+function displayRaceInfo(race, container) {
+    // Создаём HTML-структуру
+    const raceName = race.raceName;
+    const circuit = race.Circuit.circuitName;
+    const country = race.Circuit.Location.country;
+    const raceDateObj = new Date(race.date);
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = raceDateObj.toLocaleDateString('ru-RU', options);
+    
+    container.innerHTML = `
+        <div class="countdown-card">
+            <h3>СЛЕДУЮЩАЯ ГОНКА</h3>
+            <div class="race-name">${escapeHtml(raceName)}</div>
+            <div class="race-circuit">${escapeHtml(circuit)}, ${escapeHtml(country)}</div>
+            <div class="race-date">📅 ${formattedDate}</div>
+            <div class="countdown-timer" id="countdown-timer">
+                <div class="time-unit"><span id="days">00</span><span>Дней</span></div>
+                <div class="time-unit"><span id="hours">00</span><span>Часов</span></div>
+                <div class="time-unit"><span id="minutes">00</span><span>Минут</span></div>
+                <div class="time-unit"><span id="seconds">00</span><span>Секунд</span></div>
+            </div>
+            <div class="loading-previous-winner">Загрузка информации о прошлом победителе...</div>
+        </div>
+    `;
+}
+
+function startCountdown(targetDate, container) {
+    const countDownDate = new Date(targetDate).getTime();
+
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+
+        if (distance < 0) {
+            clearInterval(timerInterval);
+            document.getElementById('countdown-timer').innerHTML = '<div class="race-started">ГОНКА НАЧАЛАСЬ!</div>';
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        if (document.getElementById('days')) {
+            document.getElementById('days').innerText = days < 10 ? '0' + days : days;
+            document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
+            document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+        }
+    };
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// Загружаем данные о следующей гонке после загрузки страницы
+document.addEventListener('DOMContentLoaded', loadNextRaceData);
 })();

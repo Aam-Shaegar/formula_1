@@ -410,3 +410,103 @@ body {
         font-size: 0.7rem;
     }
 }
+
+
+
+
+
+
+/* Стили для блока обратного отсчёта */
+.countdown-container {
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+}
+
+.countdown-card {
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid #2a2a2a;
+    border-radius: 28px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+}
+
+.countdown-card h3 {
+    color: #e10600;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+}
+
+.race-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #e10600, #ffffff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.race-circuit {
+    color: #aaa;
+    margin-bottom: 1rem;
+}
+
+.race-date {
+    color: #ffcc00;
+    margin-bottom: 1.5rem;
+}
+
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1.5rem 0;
+}
+
+.time-unit {
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+    padding: 0.75rem 1.5rem;
+    border-radius: 16px;
+    min-width: 80px;
+}
+
+.time-unit span:first-child {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+.time-unit span:last-child {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.loading-indicator, .loading-previous-winner {
+    color: #aaa;
+    text-align: center;
+    padding: 1rem;
+}
+
+@media (max-width: 700px) {
+    .countdown-timer {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .time-unit {
+        min-width: 60px;
+        padding: 0.5rem;
+    }
+    .time-unit span:first-child {
+        font-size: 1.2rem;
+    }
+    .race-name {
+        font-size: 1.3rem;
+    }
+}
