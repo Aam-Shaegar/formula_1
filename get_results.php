@@ -1,22 +1,33 @@
 <?php
 // get_results.php – возвращает HTML таблицу с результатами гонок 2026
+// Работает без cURL (использует file_get_contents)
+
+function httpGet($url) {
+    // Создаём опции для HTTP-запроса
+    $options = [
+        'http' => [
+            'method' => 'GET',
+            'header' => "User-Agent: Mozilla/5.0 (compatible; F1Site/1.0)\r\n",
+            'timeout' => 30
+        ],
+        'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false
+        ]
+    ];
+    $context = stream_context_create($options);
+    $response = @file_get_contents($url, false, $context);
+    if ($response === false) {
+        return false;
+    }
+    return $response;
+}
 
 function getRaceResults($season = 2026) {
     $url = "https://api.jolpi.ca/ergast/f1/{$season}/results.json?limit=100";
     
-    $ch = curl_init();
-    curl_setopt_array($ch, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_SSL_VERIFYPEER => false,
-    ]);
-    
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    if ($httpCode !== 200) return false;
+    $response = httpGet($url);
+    if ($response === false) return false;
     
     $data = json_decode($response, true);
     if (!isset($data['MRData']['RaceTable']['Races'])) return false;
@@ -46,7 +57,6 @@ $races = getRaceResults(2026);
                 $winner = $race['Results'][0];
                 $driver = $winner['Driver'];
                 $constructor = $winner['Constructor'];
-                // Время: может быть 'Time' или 'status' (если не финишировал, но победитель всегда финиширует)
                 $time = $winner['Time']['time'] ?? $winner['status'] ?? '—';
             ?>
                 <tr>
@@ -62,5 +72,7 @@ $races = getRaceResults(2026);
     </table>
 </div>
 <?php else: ?>
-    <div class="error-message">Не удалось загрузить результаты гонок. Попробуйте позже.</div>
+    <div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">
+        ⚠️ Не удалось загрузить результаты гонок. Проверьте соединение с интернетом или попробуйте позже.
+    </div>
 <?php endif; ?>
