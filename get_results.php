@@ -1,61 +1,56 @@
 <?php
-// get_results.php – отладочная версия (покажет причину проблемы)
+// get_results.php – читает данные из локального кэша (обновляется раз в сутки)
 
-// Включаем вывод всех ошибок, чтобы видеть что идёт не так
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+function getRaceResults($season = 2026) {
+    $cacheFile = __DIR__ . '/races_cache.json';
+    $cacheTime = 86400; // 24 часа
 
-function httpGet($url) {
-    $options = [
-        'http' => [
-            'method' => 'GET',
-            'header' => "User-Agent: Mozilla/5.0 (compatible; F1Site/1.0)\r\n",
-            'timeout' => 30
-        ],
-        'ssl' => [
-            'verify_peer' => false,
-            'verify_peer_name' => false
-        ]
-    ];
-    $context = stream_context_create($options);
-    $response = @file_get_contents($url, false, $context);
-    if ($response === false) {
-        $error = error_get_last();
-        return false;
+    // Если кэш существует и не устарел – берём из него
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
+        $data = json_decode(file_get_contents($cacheFile), true);
+        if ($data) return $data;
     }
-    return $response;
+
+    // Если кэша нет – получаем данные из API
+    $url = "https://api.jolpi.ca/ergast/f1/{$season}/results.json?limit=100";
+    
+    // Пробуем разные методы запроса
+    $response = false;
+    
+    // Способ 1: file_get_contents
+    if (function_exists('file_get_contents') && ini_get('allow_url_fopen')) {
+        $context = stream_context_create([
+            'http' => ['timeout' => 30],
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+        ]);
+        $response = @file_get_contents($url, false, $context);
+    }
+    
+    // Способ 2: cURL (если есть)
+    if ($response === false && function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $response = curl_exec($ch);
+        curl_close($ch);
+    }
+    
+    if ($response === false) return false;
+    
+    $data = json_decode($response, true);
+    if (!$data || !isset($data['MRData']['RaceTable']['Races'])) return false;
+    
+    // Сохраняем в кэш
+    file_put_contents($cacheFile, $response);
+    
+    return $data['MRData']['RaceTable']['Races'];
 }
 
-$season = 2026;
-$url = "https://api.jolpi.ca/ergast/f1/{$season}/results.json?limit=100";
-
-$response = httpGet($url);
-if ($response === false) {
-    echo "<p style='color:red'>❌ Ошибка: не удалось получить данные от API. Проверьте, разрешены ли на хостинге внешние запросы (allow_url_fopen).</p>";
-    exit;
-}
-
-$data = json_decode($response, true);
-if (!$data) {
-    echo "<p style='color:red'>❌ Ошибка: не удалось разобрать JSON. Первые 200 символов ответа: <br>" . htmlspecialchars(substr($response, 0, 200)) . "...</p>";
-    exit;
-}
-
-if (!isset($data['MRData']['RaceTable']['Races'])) {
-    echo "<p style='color:red'>❌ Ошибка: структура ответа не содержит гонок. Ключи ответа: " . htmlspecialchars(implode(', ', array_keys($data))) . "</p>";
-    echo "<p>Первые 500 символов JSON: <pre>" . htmlspecialchars(substr($response, 0, 500)) . "</pre></p>";
-    exit;
-}
-
-$races = $data['MRData']['RaceTable']['Races'];
-
-if (empty($races)) {
-    echo "<p>⚠️ Нет данных о гонках за сезон 2026. Возможно, сезон ещё не начался или API не возвращает результаты.</p>";
-    exit;
-}
-
-// Если всё ок, выводим таблицу
+$races = getRaceResults(2026);
 ?>
+<?php if ($races): ?>
 <div class="table-wrapper">
     <table class="results-table">
         <thead>
@@ -69,15 +64,20 @@ if (empty($races)) {
                 $constructor = $winner['Constructor'];
                 $time = $winner['Time']['time'] ?? $winner['status'] ?? '—';
             ?>
-            <tr>
-                <td><?= htmlspecialchars($race['raceName']) ?></td>
-                <td><?= date('d M', strtotime($race['date'])) ?></td>
-                <td><?= htmlspecialchars($driver['familyName'] ?? '—') ?></td>
-                <td><?= htmlspecialchars($constructor['name'] ?? '—') ?></td>
-                <td><?= htmlspecialchars($winner['laps'] ?? '—') ?></td>
-                <td><strong><?= htmlspecialchars($time) ?></strong></td>
-            </tr>
+                <tr>
+                    <td><?= htmlspecialchars($race['raceName']) ?></td>
+                    <td><?= date('d M', strtotime($race['date'])) ?></td>
+                    <td><?= htmlspecialchars($driver['familyName'] ?? '—') ?></td>
+                    <td><?= htmlspecialchars($constructor['name'] ?? '—') ?></td>
+                    <td><?= htmlspecialchars($winner['laps'] ?? '—') ?></td>
+                    <td><strong><?= htmlspecialchars($time) ?></strong></td>
+                </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
+<?php else: ?>
+    <div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">
+        ⚠️ Не удалось загрузить результаты гонок. Проверьте подключение к интернету или попробуйте позже.
+    </div>
+<?php endif; ?>
