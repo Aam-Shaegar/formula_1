@@ -326,20 +326,37 @@ body {
 }
 
 
-/* ===== ТАБЛИЦА РЕЗУЛЬТАТОВ (загружается через AJAX) ===== */
-#race-results-container {
+/* ===== СТАТИЧЕСКАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ ===== */
+.race-results {
     margin: 4rem auto 2rem;
     max-width: 1400px;
     padding: 0 1rem;
 }
 
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #e10600, #ffffff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-transform: uppercase;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 20px;
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid #2a2a2a;
+}
+
 .results-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(10, 10, 10, 0.7);
-    backdrop-filter: blur(4px);
-    border-radius: 20px;
-    overflow: hidden;
     font-family: 'Segoe UI', 'Roboto', monospace;
     font-size: 0.95rem;
     min-width: 700px;
@@ -381,7 +398,11 @@ body {
         padding: 0.7rem 0.8rem;
         font-size: 0.8rem;
     }
+    .section-title {
+        font-size: 1.5rem;
+    }
 }
+
 @media (max-width: 600px) {
     .results-table th,
     .results-table td {

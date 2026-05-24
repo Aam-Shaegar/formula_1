@@ -212,23 +212,4 @@
             console.warn('⚠️ Логотип не найден: ./images/f1 logo.png');
         });
     }
-
-    // ---------- ЗАГРУЗКА ТАБЛИЦЫ РЕЗУЛЬТАТОВ ИЗ PHP ----------
-    async function loadRaceResults() {
-        const container = document.getElementById('race-results-container');
-        if (!container) return;
-
-        try {
-            const response = await fetch('get_results.php');
-            if (!response.ok) throw new Error('Ошибка сети');
-            const html = await response.text();
-            container.innerHTML = html;
-        } catch (error) {
-            console.error('Не удалось загрузить результаты гонок:', error);
-            container.innerHTML = '<p style="text-align:center; color:#ff6666;">⚠️ Не удалось загрузить таблицу результатов</p>';
-        }
-    }
-
-    // Загружаем таблицу после того, как страница полностью готова
-    window.addEventListener('DOMContentLoaded', loadRaceResults);
 })();
