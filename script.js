@@ -287,8 +287,7 @@
                 const formattedDate = `${dateObj.getDate().toString().padStart(2,'0')} ${dateObj.toLocaleString('ru', { month: 'short' }).replace('.','')}`;
                 html += `<tr><td>${escapeHtml(race.raceName)}</td><td>${formattedDate}</td><td>${escapeHtml(driver?.familyName || '—')}</td><td>${escapeHtml(constructor?.name || '—')}</td><td>${winner.laps || '—'}</td><td><strong>${escapeHtml(time)}</strong></td></tr>`;
             }
-            html += `</tbody>}</div></div>`;
-            container.innerHTML = html;
+            html += `</tbody></table></div></div>`;            container.innerHTML = html;
         } catch (error) {
             container.innerHTML = '<div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">⚠️ Не удалось загрузить результаты гонок</div>';
         }
