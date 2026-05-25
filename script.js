@@ -33,19 +33,16 @@
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const dotsContainer = document.getElementById('sliderDots');
-
-    const totalOriginal = 11;           // количество реальных изображений
-    let currentIndex = 1;               // индекс в расширенном массиве (с учетом клонов)
+    const totalOriginal = 11;
+    let currentIndex = 1;
     let originalImages = [];
     let slideWidth = 0;
     let isTransitioning = false;
 
-    // Генерируем пути к оригинальным изображениям (с .png)
     for (let i = 1; i <= totalOriginal; i++) {
         originalImages.push(`./images/slider1_${i}.png`);
     }
 
-    // Строим расширенный массив: [копия последнего, ...оригиналы..., копия первого]
     function getExtendedImages() {
         if (originalImages.length === 0) return [];
         const last = originalImages[originalImages.length - 1];
@@ -55,13 +52,11 @@
 
     let extendedImages = [];
 
-    // Построение DOM: создаём img для каждого расширенного слайда и точки для оригиналов
     function buildSlider() {
         extendedImages = getExtendedImages();
         track.innerHTML = '';
         dotsContainer.innerHTML = '';
 
-        // Создаем изображения
         extendedImages.forEach((src, idx) => {
             const img = document.createElement('img');
             img.src = src;
@@ -73,7 +68,6 @@
             track.appendChild(img);
         });
 
-        // Создаем точки (только для оригиналов)
         for (let i = 0; i < totalOriginal; i++) {
             const dot = document.createElement('div');
             dot.classList.add('dot');
@@ -84,12 +78,9 @@
             dotsContainer.appendChild(dot);
         }
 
-        // Устанавливаем начальную позицию: смещение на 1 слайд (показываем первый оригинал)
-        currentIndex = 1; // т.к. extended[0] - клон последнего, extended[1] - первый оригинал
+        currentIndex = 1;
         updateSliderPosition(false);
         updateDots();
-
-        // Слушатель окончания transition, чтобы сделать "бесшовный сброс"
         track.addEventListener('transitionend', handleTransitionEnd);
     }
 
@@ -102,9 +93,7 @@
         }
         slideWidth = track.children[0].clientWidth;
         track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
-        // Принудительно сбрасываем transition после синхронного обновления, если анимация не нужна
         if (!animate) {
-            // небольшая задержка, чтобы браузер успел применить стили
             setTimeout(() => {
                 track.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
             }, 20);
@@ -112,28 +101,18 @@
     }
 
     function handleTransitionEnd() {
-        // Если мы на клоне последнего (индекс 0) — перепрыгиваем на оригинал последнего
         if (currentIndex === 0) {
-            currentIndex = totalOriginal; // индекс оригинала последнего (т.к. extended[totalOriginal] — последний оригинал? Давайте разберем)
-            // extended = [clone_last, original1, original2, ..., originalN, clone_first]
-            // Индексы: 0 - clone_last; 1..totalOriginal - оригиналы (1..N); totalOriginal+1 - clone_first
-            // Оригинал последнего имеет индекс totalOriginal (например, 11 при N=11)
-            // Значит, при переходе на clone_last (0) надо переместиться на totalOriginal (последний оригинал)
+            currentIndex = totalOriginal;
             updateSliderPosition(false);
-        } 
-        // Если мы на клоне первого (индекс totalOriginal+1) — перепрыгиваем на первый оригинал (индекс 1)
-        else if (currentIndex === totalOriginal + 1) {
+        } else if (currentIndex === totalOriginal + 1) {
             currentIndex = 1;
             updateSliderPosition(false);
         }
-        // Обновляем точки в соответствии с реальным оригинальным индексом
         updateDots();
     }
 
     function goToOriginalSlide(originalIdx) {
         if (isTransitioning) return;
-        // оригинальный индекс от 0 до totalOriginal-1
-        // в extended он соответствует индексу originalIdx + 1 (т.к. первый клон в 0)
         const targetExtendedIndex = originalIdx + 1;
         if (targetExtendedIndex === currentIndex) return;
         currentIndex = targetExtendedIndex;
@@ -156,16 +135,14 @@
     }
 
     function updateDots() {
-        // Определяем, какой оригинальный слайд сейчас показывается
         let originalIdx;
         if (currentIndex === 0) {
-            originalIdx = totalOriginal - 1; // клон последнего -> последний оригинал
+            originalIdx = totalOriginal - 1;
         } else if (currentIndex === totalOriginal + 1) {
-            originalIdx = 0; // клон первого -> первый оригинал
+            originalIdx = 0;
         } else {
-            originalIdx = currentIndex - 1; // т.к. extended[1] -> оригинал[0]
+            originalIdx = currentIndex - 1;
         }
-        // На всякий случай ограничим
         if (originalIdx < 0) originalIdx = 0;
         if (originalIdx >= totalOriginal) originalIdx = totalOriginal - 1;
 
@@ -179,11 +156,9 @@
         });
     }
 
-    // Обработчики кнопок
     if (prevBtn) prevBtn.addEventListener('click', prevSlide);
     if (nextBtn) nextBtn.addEventListener('click', nextSlide);
 
-    // Адаптация при ресайзе
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
@@ -195,17 +170,14 @@
         }, 100);
     });
 
-    // Старт
     buildSlider();
 
-    // Дополнительная коррекция после полной загрузки всех изображений
     window.addEventListener('load', () => {
         setTimeout(() => {
             updateSliderPosition(false);
         }, 100);
     });
 
-    // Логотип
     const logoImg = document.querySelector('.logo');
     if (logoImg) {
         logoImg.addEventListener('error', () => {
@@ -213,116 +185,147 @@
         });
     }
 
-
-
-
     // --- Логика обратного отсчета до следующей гонки ---
-async function loadNextRaceData() {
-    const container = document.getElementById('next-race-countdown');
-    if (!container) return;
-
-    try {
-        // 1. Запрашиваем календарь гонок на 2026 год
-        const response = await fetch('https://api.jolpi.ca/ergast/f1/2026.json');
-        if (!response.ok) throw new Error('Ошибка загрузки календаря');
-        
-        const data = await response.json();
-        const races = data.MRData.RaceTable.Races;
-        if (!races || races.length === 0) throw new Error('Нет данных о гонках');
-
-        // 2. Находим следующую гонку
-        const now = new Date();
-        let nextRace = null;
-        for (const race of races) {
-            const raceDate = new Date(race.date);
-            // Сравниваем только дату, без учёта времени
-            if (raceDate >= now) {
-                nextRace = race;
-                break;
+    async function loadNextRaceData() {
+        const container = document.getElementById('next-race-countdown');
+        if (!container) return;
+        try {
+            const response = await fetch('https://api.jolpi.ca/ergast/f1/2026.json');
+            if (!response.ok) throw new Error('Ошибка загрузки календаря');
+            const data = await response.json();
+            const races = data.MRData.RaceTable.Races;
+            if (!races || races.length === 0) throw new Error('Нет данных о гонках');
+            const now = new Date();
+            let nextRace = null;
+            for (const race of races) {
+                const raceDate = new Date(race.date);
+                if (raceDate >= now) {
+                    nextRace = race;
+                    break;
+                }
             }
+            if (!nextRace) {
+                container.innerHTML = '<div class="countdown-card">Сезон 2026 года завершён. До следующего сезона ещё много времени!</div>';
+                return;
+            }
+            displayRaceInfo(nextRace, container);
+            startCountdown(nextRace.date, container);
+        } catch (error) {
+            console.error('Ошибка получения данных о следующей гонке:', error);
+            container.innerHTML = '<div class="countdown-card error">⚠️ Не удалось загрузить информацию о следующей гонке.</div>';
         }
-        
-        if (!nextRace) {
-            container.innerHTML = '<div class="countdown-card">Сезон 2026 года завершён. До следующего сезона ещё много времени!</div>';
-            return;
-        }
-
-        // 3. Показываем информацию о гонке и запускаем таймер
-        displayRaceInfo(nextRace, container);
-        startCountdown(nextRace.date, container);
-        
-    } catch (error) {
-        console.error('Ошибка получения данных о следующей гонке:', error);
-        container.innerHTML = '<div class="countdown-card error">⚠️ Не удалось загрузить информацию о следующей гонке.</div>';
     }
-}
 
-function displayRaceInfo(race, container) {
-    // Создаём HTML-структуру
-    const raceName = race.raceName;
-    const circuit = race.Circuit.circuitName;
-    const country = race.Circuit.Location.country;
-    const raceDateObj = new Date(race.date);
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = raceDateObj.toLocaleDateString('ru-RU', options);
-    
-    container.innerHTML = `
-        <div class="countdown-card">
-            <h3>СЛЕДУЮЩАЯ ГОНКА</h3>
-            <div class="race-name">${escapeHtml(raceName)}</div>
-            <div class="race-circuit">${escapeHtml(circuit)}, ${escapeHtml(country)}</div>
-            <div class="race-date">📅 ${formattedDate}</div>
-            <div class="countdown-timer" id="countdown-timer">
-                <div class="time-unit"><span id="days">00</span><span>Дней</span></div>
-                <div class="time-unit"><span id="hours">00</span><span>Часов</span></div>
-                <div class="time-unit"><span id="minutes">00</span><span>Минут</span></div>
-                <div class="time-unit"><span id="seconds">00</span><span>Секунд</span></div>
+    function displayRaceInfo(race, container) {
+        const raceName = race.raceName;
+        const circuit = race.Circuit.circuitName;
+        const country = race.Circuit.Location.country;
+        const raceDateObj = new Date(race.date);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = raceDateObj.toLocaleDateString('ru-RU', options);
+        container.innerHTML = `
+            <div class="countdown-card">
+                <h3>СЛЕДУЮЩАЯ ГОНКА</h3>
+                <div class="race-name">${escapeHtml(raceName)}</div>
+                <div class="race-circuit">${escapeHtml(circuit)}, ${escapeHtml(country)}</div>
+                <div class="race-date">${formattedDate}</div>
+                <div class="countdown-timer" id="countdown-timer">
+                    <div class="time-unit"><span id="days">00</span><span>Дней</span></div>
+                    <div class="time-unit"><span id="hours">00</span><span>Часов</span></div>
+                    <div class="time-unit"><span id="minutes">00</span><span>Минут</span></div>
+                    <div class="time-unit"><span id="seconds">00</span><span>Секунд</span></div>
+                </div>
+                <div class="loading-previous-winner">Загрузка информации о прошлом победителе...</div>
             </div>
-            <div class="loading-previous-winner">Загрузка информации о прошлом победителе...</div>
-        </div>
-    `;
-}
+        `;
+    }
 
-function startCountdown(targetDate, container) {
-    const countDownDate = new Date(targetDate).getTime();
+    function startCountdown(targetDate, container) {
+        const countDownDate = new Date(targetDate).getTime();
+        const updateTimer = () => {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+            if (distance < 0) {
+                clearInterval(timerInterval);
+                const timerDiv = document.getElementById('countdown-timer');
+                if (timerDiv) timerDiv.innerHTML = '<div class="race-started">ГОНКА НАЧАЛАСЬ!</div>';
+                return;
+            }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (document.getElementById('days')) {
+                document.getElementById('days').innerText = days < 10 ? '0' + days : days;
+                document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
+                document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+                document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+            }
+        };
+        updateTimer();
+        const timerInterval = setInterval(updateTimer, 1000);
+    }
 
-    const updateTimer = () => {
-        const now = new Date().getTime();
-        const distance = countDownDate - now;
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
 
-        if (distance < 0) {
-            clearInterval(timerInterval);
-            document.getElementById('countdown-timer').innerHTML = '<div class="race-started">ГОНКА НАЧАЛАСЬ!</div>';
-            return;
+    // ========== ТАБЛИЦА РЕЗУЛЬТАТОВ (динамическая) ==========
+    async function loadResultsTable() {
+        const container = document.getElementById('race-results-table');
+        if (!container) return;
+        try {
+            const response = await fetch('https://api.jolpi.ca/ergast/f1/2026/results.json?limit=100');
+            if (!response.ok) throw new Error('Ошибка загрузки результатов');
+            const data = await response.json();
+            const races = data.MRData.RaceTable.Races;
+            if (!races || races.length === 0) throw new Error('Нет данных');
+            let html = `
+                <div class="race-results">
+                    <h2 class="section-title">2026 RACE RESULTS</h2>
+                    <div class="table-wrapper">
+                        <table class="results-table">
+                            <thead>
+                                <tr><th>ГРАН-ПРИ</th><th>ДАТА</th><th>ПОБЕДИТЕЛЬ</th><th>КОМАНДА</th><th>КРУГИ</th><th>ВРЕМЯ</th></tr>
+                            </thead>
+                            <tbody>
+            `;
+            for (const race of races) {
+                if (!race.Results || race.Results.length === 0) continue;
+                const winner = race.Results[0];
+                const driver = winner.Driver;
+                const constructor = winner.Constructor;
+                const time = winner.Time?.time || winner.status || '—';
+                const dateObj = new Date(race.date);
+                const formattedDate = `${dateObj.getDate().toString().padStart(2,'0')} ${dateObj.toLocaleString('ru', { month: 'short' }).replace('.','')}`;
+                html += `
+                    <tr>
+                        <td>${escapeHtml(race.raceName)}</td>
+                        <td>${formattedDate}</td>
+                        <td>${escapeHtml(driver?.familyName || '—')}</td>
+                        <td>${escapeHtml(constructor?.name || '—')}</td>
+                        <td>${winner.laps || '—'}</td>
+                        <td><strong>${escapeHtml(time)}</strong></td>
+                    </tr>
+                `;
+            }
+            html += `</tbody></table></div></div>`;
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Таблица не загружена:', error);
+            container.innerHTML = '<div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">⚠️ Не удалось загрузить результаты гонок</div>';
         }
+    }
 
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        if (document.getElementById('days')) {
-            document.getElementById('days').innerText = days < 10 ? '0' + days : days;
-            document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
-            document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
-        }
-    };
-
-    updateTimer();
-    const timerInterval = setInterval(updateTimer, 1000);
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
+    // Запускаем обе функции после загрузки страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        loadNextRaceData();
+        loadResultsTable();
     });
-}
-
-// Загружаем данные о следующей гонке после загрузки страницы
-document.addEventListener('DOMContentLoaded', loadNextRaceData);
 })();

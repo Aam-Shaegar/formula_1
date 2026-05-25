@@ -30,45 +30,24 @@
     </nav>
 
     <main class="main-content">
-        <!-- Огромная надпись "ФОРМУЛА 1" -->
-        <div class="hero-title">
-            ФОРМУЛА 1
-        </div>
+        <!-- Огромная надпись -->
+        <div class="hero-title">ФОРМУЛА 1</div>
 
         <!-- Слайдер -->
         <div class="slider-container">
             <button class="slider-btn prev-btn" id="prevBtn">&#10094;</button>
-            <div class="slider-track" id="sliderTrack">
-                <!-- Картинки будут подставлены JS, но прописываем сразу для надежности -->
-            </div>
+            <div class="slider-track" id="sliderTrack"></div>
             <button class="slider-btn next-btn" id="nextBtn">&#10095;</button>
         </div>
-        <!-- Индикаторы (опционально, для удобства) -->
         <div class="slider-dots" id="sliderDots"></div>
 
-        <!-- Таблица результатов (статическая) -->
-<div class="race-results">
-    <h2 class="section-title">2026 RACE RESULTS</h2>
-    <div class="table-wrapper">
-        <table class="results-table">
-            <thead>
-                <tr><th>ГРАН-ПРИ</th><th>ДАТА</th><th>ПОБЕДИТЕЛЬ</th><th>КОМАНДА</th><th>КРУГИ</th><th>ВРЕМЯ</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>🇦🇺 Australia</td><td>08 Mar</td><td>Russell</td><td>Mercedes</td><td>58</td><td><strong>1:23:06.801</strong></td></tr>
-                <tr><td>🇨🇳 China</td><td>15 Mar</td><td>Antonelli</td><td>Mercedes</td><td>56</td><td><strong>1:33:15.607</strong></td></tr>
-                <tr><td>🇯🇵 Japan</td><td>29 Mar</td><td>Antonelli</td><td>Mercedes</td><td>53</td><td><strong>1:28:03.403</strong></td></tr>
-                <tr><td>🇺🇸 Miami</td><td>03 May</td><td>Antonelli</td><td>Mercedes</td><td>57</td><td><strong>1:33:19.273</strong></td></tr>
-                <tr><td>🇨🇦 Canada</td><td>24 May</td><td>Antonelli</td><td>Mercedes</td><td>68</td><td><strong>1:28:15.758</strong></td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-        
-<div id="next-race-countdown" class="countdown-container">
-    <div class="loading-indicator">Загрузка информации о следующей гонке...</div>
-</div>
+        <!-- ДИНАМИЧЕСКАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ (загружается из API) -->
+        <div id="race-results-table"></div>
 
+        <!-- БЛОК ОБРАТНОГО ОТСЧЁТА -->
+        <div id="next-race-countdown" class="countdown-container">
+            <div class="loading-indicator">Загрузка информации о следующей гонке...</div>
+        </div>
     </main>
 
     <script src="script.js"></script>
