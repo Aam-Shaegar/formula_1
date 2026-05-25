@@ -1,5 +1,5 @@
 (function() {
-    console.log('✅ Бесконечная карусель Формулы 1');
+    console.log('✅ Сайт Формулы 1 — полная версия');
 
     // ---------- ГАМБУРГЕР ----------
     const hamburger = document.getElementById('hamburgerBtn');
@@ -17,7 +17,7 @@
             });
         });
     }
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', () => {
         if (window.innerWidth > 768) {
             if (navLinks && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
@@ -28,7 +28,7 @@
         }
     });
 
-    // ---------- КАРУСЕЛЬ (оставлена без изменений, только убрал дублирование) ----------
+    // ---------- КАРУСЕЛЬ (полностью ваш старый код) ----------
     const track = document.getElementById('sliderTrack');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -42,21 +42,17 @@
     for (let i = 1; i <= totalOriginal; i++) {
         originalImages.push(`./images/slider1_${i}.png`);
     }
-
     function getExtendedImages() {
         if (originalImages.length === 0) return [];
         const last = originalImages[originalImages.length - 1];
         const first = originalImages[0];
         return [last, ...originalImages, first];
     }
-
     let extendedImages = [];
-
     function buildSlider() {
         extendedImages = getExtendedImages();
         track.innerHTML = '';
         dotsContainer.innerHTML = '';
-
         extendedImages.forEach((src, idx) => {
             const img = document.createElement('img');
             img.src = src;
@@ -67,30 +63,22 @@
             };
             track.appendChild(img);
         });
-
         for (let i = 0; i < totalOriginal; i++) {
             const dot = document.createElement('div');
             dot.classList.add('dot');
             dot.dataset.index = i;
-            dot.addEventListener('click', () => {
-                goToOriginalSlide(i);
-            });
+            dot.addEventListener('click', () => { goToOriginalSlide(i); });
             dotsContainer.appendChild(dot);
         }
-
         currentIndex = 1;
         updateSliderPosition(false);
         updateDots();
         track.addEventListener('transitionend', handleTransitionEnd);
     }
-
     function updateSliderPosition(animate = true) {
         if (!track.children.length) return;
-        if (!animate) {
-            track.style.transition = 'none';
-        } else {
-            track.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-        }
+        if (!animate) track.style.transition = 'none';
+        else track.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
         slideWidth = track.children[0].clientWidth;
         track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
         if (!animate) {
@@ -99,7 +87,6 @@
             }, 20);
         }
     }
-
     function handleTransitionEnd() {
         if (currentIndex === 0) {
             currentIndex = totalOriginal;
@@ -110,7 +97,6 @@
         }
         updateDots();
     }
-
     function goToOriginalSlide(originalIdx) {
         if (isTransitioning) return;
         const targetExtendedIndex = originalIdx + 1;
@@ -119,46 +105,33 @@
         updateSliderPosition(true);
         updateDots();
     }
-
     function nextSlide() {
         if (isTransitioning) return;
         currentIndex++;
         updateSliderPosition(true);
         updateDots();
     }
-
     function prevSlide() {
         if (isTransitioning) return;
         currentIndex--;
         updateSliderPosition(true);
         updateDots();
     }
-
     function updateDots() {
         let originalIdx;
-        if (currentIndex === 0) {
-            originalIdx = totalOriginal - 1;
-        } else if (currentIndex === totalOriginal + 1) {
-            originalIdx = 0;
-        } else {
-            originalIdx = currentIndex - 1;
-        }
+        if (currentIndex === 0) originalIdx = totalOriginal - 1;
+        else if (currentIndex === totalOriginal + 1) originalIdx = 0;
+        else originalIdx = currentIndex - 1;
         if (originalIdx < 0) originalIdx = 0;
         if (originalIdx >= totalOriginal) originalIdx = totalOriginal - 1;
-
         const dots = document.querySelectorAll('.dot');
         dots.forEach((dot, idx) => {
-            if (idx === originalIdx) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
+            if (idx === originalIdx) dot.classList.add('active');
+            else dot.classList.remove('active');
         });
     }
-
     if (prevBtn) prevBtn.addEventListener('click', prevSlide);
     if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
@@ -169,40 +142,28 @@
             }
         }, 100);
     });
-
     buildSlider();
-
     window.addEventListener('load', () => {
-        setTimeout(() => {
-            updateSliderPosition(false);
-        }, 100);
+        setTimeout(() => { updateSliderPosition(false); }, 100);
     });
-
     const logoImg = document.querySelector('.logo');
-    if (logoImg) {
-        logoImg.addEventListener('error', () => {
-            console.warn('⚠️ Логотип не найден: ./images/f1 logo.png');
-        });
-    }
+    if (logoImg) logoImg.addEventListener('error', () => { console.warn('⚠️ Логотип не найден'); });
 
-    // ---------- ОБРАТНЫЙ ОТСЧЁТ И ПРОШЛЫЙ ПОБЕДИТЕЛЬ (как было) ----------
+    // ---------- ОБРАТНЫЙ ОТСЧЁТ И ПРОШЛЫЙ ПОБЕДИТЕЛЬ (ваш старый код) ----------
     async function loadNextRaceData() {
         const container = document.getElementById('next-race-countdown');
         if (!container) return;
         try {
             const response = await fetch('https://api.jolpi.ca/ergast/f1/2026.json');
-            if (!response.ok) throw new Error('Ошибка загрузки календаря');
+            if (!response.ok) throw new Error();
             const data = await response.json();
             const races = data.MRData.RaceTable.Races;
-            if (!races || races.length === 0) throw new Error('Нет данных о гонках');
+            if (!races || races.length === 0) throw new Error();
             const now = new Date();
             let nextRace = null;
             for (const race of races) {
                 const raceDate = new Date(race.date);
-                if (raceDate >= now) {
-                    nextRace = race;
-                    break;
-                }
+                if (raceDate >= now) { nextRace = race; break; }
             }
             if (!nextRace) {
                 container.innerHTML = '<div class="countdown-card">Сезон 2026 года завершён. До следующего сезона ещё много времени!</div>';
@@ -211,18 +172,15 @@
             displayRaceInfo(nextRace, container);
             startCountdown(nextRace.date, container);
         } catch (error) {
-            console.error('Ошибка получения данных о следующей гонке:', error);
             container.innerHTML = '<div class="countdown-card error">⚠️ Не удалось загрузить информацию о следующей гонке.</div>';
         }
     }
-
     function displayRaceInfo(race, container) {
         const raceName = race.raceName;
         const circuit = race.Circuit.circuitName;
         const country = race.Circuit.Location.country;
         const raceDateObj = new Date(race.date);
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const formattedDate = raceDateObj.toLocaleDateString('ru-RU', options);
+        const formattedDate = raceDateObj.toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         container.innerHTML = `
             <div class="countdown-card">
                 <h3>СЛЕДУЮЩАЯ ГОНКА</h3>
@@ -240,8 +198,7 @@
         `;
         loadPreviousWinner(race);
     }
-
-    function startCountdown(targetDate, container) {
+    function startCountdown(targetDate) {
         const countDownDate = new Date(targetDate).getTime();
         let timerInterval;
         const updateTimer = () => {
@@ -267,7 +224,6 @@
         updateTimer();
         timerInterval = setInterval(updateTimer, 1000);
     }
-
     async function loadPreviousWinner(nextRace) {
         const winnerContainer = document.getElementById('previous-winner-info');
         if (!winnerContainer) return;
@@ -310,16 +266,16 @@
         winnerContainer.innerHTML = `<div class="previous-winner-card placeholder"><div class="winner-photo placeholder-icon">🏁</div><div class="winner-details"><div class="winner-label">НЕТ ДАННЫХ О ПРОШЛОМ ПОБЕДИТЕЛЕ</div><div class="winner-name">Эта трасса ещё не проводила гонок в 2021–2025</div><div class="winner-team">Данные появятся после первой гонки</div></div></div>`;
     }
 
-    // ========== ТАБЛИЦА РЕЗУЛЬТАТОВ (без изменений) ==========
+    // ---------- ТАБЛИЦА РЕЗУЛЬТАТОВ (ваш старый код) ----------
     async function loadResultsTable() {
         const container = document.getElementById('race-results-table');
         if (!container) return;
         try {
             const response = await fetch('https://api.jolpi.ca/ergast/f1/2026/results.json?limit=100');
-            if (!response.ok) throw new Error('Ошибка загрузки результатов');
+            if (!response.ok) throw new Error();
             const data = await response.json();
             const races = data.MRData.RaceTable.Races;
-            if (!races || races.length === 0) throw new Error('Нет данных');
+            if (!races || races.length === 0) throw new Error();
             let html = `<div class="race-results"><h2 class="section-title">2026 RACE RESULTS</h2><div class="table-wrapper"><table class="results-table"><thead><tr><th>ГРАН-ПРИ</th><th>ДАТА</th><th>ПОБЕДИТЕЛЬ</th><th>КОМАНДА</th><th>КРУГИ</th><th>ВРЕМЯ</th></tr></thead><tbody>`;
             for (const race of races) {
                 if (!race.Results || race.Results.length === 0) continue;
@@ -331,21 +287,20 @@
                 const formattedDate = `${dateObj.getDate().toString().padStart(2,'0')} ${dateObj.toLocaleString('ru', { month: 'short' }).replace('.','')}`;
                 html += `<tr><td>${escapeHtml(race.raceName)}</td><td>${formattedDate}</td><td>${escapeHtml(driver?.familyName || '—')}</td><td>${escapeHtml(constructor?.name || '—')}</td><td>${winner.laps || '—'}</td><td><strong>${escapeHtml(time)}</strong></td></tr>`;
             }
-            html += `</tbody></table></div></div>`;
+            html += `</tbody>}</div></div>`;
             container.innerHTML = html;
         } catch (error) {
             container.innerHTML = '<div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">⚠️ Не удалось загрузить результаты гонок</div>';
         }
     }
 
-    // ========== НОВЫЙ ФРОНТЕНД: голосование, лента, форма ==========
+    // ---------- НОВЫЙ ФРОНТЕНД: голосование, лента, форма ----------
     const driversList = [
         "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Lando Norris",
         "Carlos Sainz", "George Russell", "Sergio Pérez", "Fernando Alonso",
         "Oscar Piastri", "Pierre Gasly", "Esteban Ocon", "Alexander Albon"
     ];
 
-    // 1. Голосование (диаграмма)
     async function loadPoll() {
         const container = document.getElementById('poll-container');
         if (!container) return;
@@ -353,32 +308,20 @@
             const res = await fetch('api/poll.php');
             if (!res.ok) throw new Error();
             const data = await res.json();
-            renderPoll(data);
+            let total = 0;
+            for (let d of driversList) total += data[d] || 0;
+            let html = '';
+            for (let driver of driversList) {
+                const count = data[driver] || 0;
+                const percent = total ? (count/total*100).toFixed(1) : 0;
+                html += `<div class="poll-bar"><div class="poll-driver">${escapeHtml(driver)}</div><div class="poll-bar-bg"><div class="poll-bar-fill" style="width:${percent}%">${percent}%</div></div><div class="poll-percent">${count} гол.</div></div>`;
+            }
+            container.innerHTML = html;
         } catch (err) {
             container.innerHTML = '<p class="error-message">Не удалось загрузить голосование</p>';
         }
     }
 
-    function renderPoll(votesObj) {
-        const container = document.getElementById('poll-container');
-        let total = 0;
-        for (let d of driversList) total += votesObj[d] || 0;
-        let html = '';
-        for (let driver of driversList) {
-            const count = votesObj[driver] || 0;
-            const percent = total ? (count/total*100).toFixed(1) : 0;
-            html += `
-                <div class="poll-bar">
-                    <div class="poll-driver">${escapeHtml(driver)}</div>
-                    <div class="poll-bar-bg"><div class="poll-bar-fill" style="width:${percent}%">${percent}%</div></div>
-                    <div class="poll-percent">${count} гол.</div>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
-    }
-
-    // 2. Бегущая лента комментариев
     async function loadTicker() {
         const trackDiv = document.getElementById('ticker-track');
         if (!trackDiv) return;
@@ -391,19 +334,12 @@
                 return;
             }
             let html = '';
-            for (let i = 0; i < 2; i++) { // дублируем для плавности
+            for (let i = 0; i < 2; i++) {
                 comments.forEach(c => {
-                    html += `
-                        <div class="ticker-item" data-id="${c.id}">
-                            <div class="ticker-name">${escapeHtml(c.name)}</div>
-                            <div class="ticker-date">${escapeHtml(c.updated_at)}</div>
-                            <div class="ticker-comment">${escapeHtml(c.comment.substring(0, 150))}${c.comment.length>150?'…':''}</div>
-                        </div>
-                    `;
+                    html += `<div class="ticker-item" data-id="${c.id}"><div class="ticker-name">${escapeHtml(c.name)}</div><div class="ticker-date">${escapeHtml(c.updated_at)}</div><div class="ticker-comment">${escapeHtml(c.comment.substring(0, 150))}${c.comment.length>150?'…':''}</div></div>`;
                 });
             }
             trackDiv.innerHTML = html;
-            // остановка по клику
             document.querySelectorAll('.ticker-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -415,12 +351,9 @@
         }
     }
 
-    // 3. Форма регистрации
     async function initForm() {
         const form = document.getElementById('user-form');
         if (!form) return;
-
-        // заполнение чекбоксов гонщиков
         const driversContainer = document.getElementById('drivers-checkboxes');
         if (driversContainer) {
             driversContainer.innerHTML = '';
@@ -430,62 +363,53 @@
                 driversContainer.appendChild(label);
             });
         }
-
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Очистка предыдущих ошибок
             document.querySelectorAll('.field-error').forEach(el => el.innerHTML = '');
             document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const birthdate = document.getElementById('birthdate').value;
             const drivers = Array.from(document.querySelectorAll('input[name="drivers"]:checked')).map(cb => cb.value);
             const comment = document.getElementById('comment').value.trim();
             const terms = document.getElementById('terms').checked;
-
             let hasError = false;
-
-            // Простейшая клиентская валидация (серверная тоже есть)
             if (!/^[a-zA-Zа-яА-ЯёЁ]+$/.test(name) || (/[a-zA-Z]/.test(name) && /[а-яА-ЯёЁ]/.test(name))) {
-                showError('name-error', 'Имя должно содержать только русские или только английские буквы');
+                document.getElementById('name-error').innerHTML = 'Имя должно содержать только русские или только английские буквы';
                 document.getElementById('name').classList.add('error');
                 hasError = true;
             }
             if (!email.includes('@') || !email.includes('.')) {
-                showError('email-error', 'Неверный формат email');
+                document.getElementById('email-error').innerHTML = 'Неверный формат email';
                 document.getElementById('email').classList.add('error');
                 hasError = true;
             }
             if (!birthdate) {
-                showError('birthdate-error', 'Введите дату рождения');
+                document.getElementById('birthdate-error').innerHTML = 'Введите дату рождения';
                 document.getElementById('birthdate').classList.add('error');
                 hasError = true;
             } else {
                 const age = new Date().getFullYear() - new Date(birthdate).getFullYear();
                 if (age < 12) {
-                    showError('birthdate-error', 'Вам должно быть не менее 12 лет');
+                    document.getElementById('birthdate-error').innerHTML = 'Вам должно быть не менее 12 лет';
                     document.getElementById('birthdate').classList.add('error');
                     hasError = true;
                 }
             }
             if (drivers.length === 0) {
-                showError('drivers-error', 'Выберите хотя бы одного гонщика');
+                document.getElementById('drivers-error').innerHTML = 'Выберите хотя бы одного гонщика';
                 document.getElementById('drivers-checkboxes').classList.add('error');
                 hasError = true;
             }
             if (!terms) {
-                showError('terms-error', 'Необходимо подтвердить ознакомление с контрактом');
+                document.getElementById('terms-error').innerHTML = 'Необходимо подтвердить ознакомление с контрактом';
                 hasError = true;
             }
-
             if (hasError) return;
-
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
             const msgDiv = document.getElementById('form-message');
             msgDiv.innerHTML = 'Отправка...';
-
             try {
                 const res = await fetch('api/register.php', {
                     method: 'POST',
@@ -496,8 +420,8 @@
                 if (res.ok && data.success) {
                     msgDiv.innerHTML = `<span style="color: #4caf50;">✅ Регистрация успешна!<br>Логин: ${escapeHtml(data.email)}<br>Пароль: <strong>${escapeHtml(data.password)}</strong><br>Сохраните пароль, он больше не будет показан.</span>`;
                     form.reset();
-                    loadTicker(); // обновляем ленту
-                    loadPoll();   // обновляем диаграмму
+                    loadTicker();
+                    loadPoll();
                     setTimeout(() => { msgDiv.innerHTML = ''; }, 15000);
                 } else {
                     let errorMsg = '';
@@ -523,11 +447,6 @@
         });
     }
 
-    function showError(elementId, message) {
-        const el = document.getElementById(elementId);
-        if (el) el.innerHTML = message;
-    }
-
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -538,7 +457,7 @@
         });
     }
 
-    // Запуск всех функций при загрузке DOM
+    // ---------- ЗАПУСК ВСЕГО ----------
     document.addEventListener('DOMContentLoaded', () => {
         loadNextRaceData();
         loadResultsTable();
