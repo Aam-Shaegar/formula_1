@@ -3,20 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя анкета</title>
+    <title>Моя анкета | F1</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="form-section" style="max-width: 800px; margin: 2rem auto;">
-        <h2 class="section-title">Редактирование анкеты</h2>
-        <form id="profile-form" class="user-form">
-            <div class="form-row"><input type="text" id="profile-name" placeholder="Имя" required><div class="field-error" id="name-error"></div></div>
-            <div class="form-row"><input type="date" id="profile-birthdate" required><div class="field-error" id="birthdate-error"></div></div>
-            <div class="form-row"><textarea id="profile-comment" placeholder="Комментарий" rows="4"></textarea></div>
-            <div class="form-row"><label>Любимые гонщики:</label><div id="profile-drivers" class="drivers-grid"></div><div class="field-error" id="drivers-error"></div></div>
-            <button type="submit" id="saveBtn">Сохранить изменения</button>
-            <button type="button" id="backToHome">На главную</button>
-            <div id="profile-message"></div>
+<body class="profile-page">
+    <div class="profile-card">
+        <h2 class="section-title">📝 РЕДАКТИРОВАНИЕ АНКЕТЫ</h2>
+        <form id="profile-form" class="user-form" style="background: transparent; padding: 0;">
+            <div class="form-row">
+                <input type="text" id="profile-name" placeholder="Имя (только русские или только английские буквы)" required>
+                <div class="field-error" id="name-error"></div>
+            </div>
+            <div class="form-row">
+                <input type="date" id="profile-birthdate" required>
+                <div class="field-error" id="birthdate-error"></div>
+            </div>
+            <div class="form-row">
+                <textarea id="profile-comment" placeholder="Ваш комментарий (необязательно)" rows="4"></textarea>
+            </div>
+            <div class="form-row">
+                <label>Любимые гонщики (можно несколько):</label>
+                <div id="profile-drivers" class="drivers-grid"></div>
+                <div class="field-error" id="drivers-error"></div>
+            </div>
+            <div class="form-row">
+                <button type="submit" id="saveBtn">💾 СОХРАНИТЬ ИЗМЕНЕНИЯ</button>
+            </div>
+            <div class="form-row">
+                <button type="button" id="backToHome" style="background: #333;">← НА ГЛАВНУЮ</button>
+            </div>
+            <div id="profile-message" class="form-message"></div>
         </form>
     </div>
     <script>
@@ -55,9 +71,8 @@
             const birthdate = document.getElementById('profile-birthdate').value;
             const comment = document.getElementById('profile-comment').value.trim();
             const drivers = Array.from(document.querySelectorAll('#profile-drivers input:checked')).map(cb => cb.value);
-            // простая валидация
             if (!name || !birthdate || drivers.length === 0) {
-                document.getElementById('profile-message').innerHTML = 'Заполните все обязательные поля';
+                document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">❌ Заполните все обязательные поля</span>';
                 return;
             }
             try {
@@ -68,12 +83,12 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    document.getElementById('profile-message').innerHTML = '<span style="color: #4caf50;">Изменения сохранены</span>';
+                    document.getElementById('profile-message').innerHTML = '<span style="color: #4caf50;">✅ Изменения сохранены</span>';
                 } else {
-                    document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">Ошибка сохранения</span>';
+                    document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">❌ Ошибка сохранения</span>';
                 }
             } catch (err) {
-                document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">Ошибка сервера</span>';
+                document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">❌ Ошибка сервера</span>';
             }
         });
 
