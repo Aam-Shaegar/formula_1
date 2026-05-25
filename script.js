@@ -336,52 +336,70 @@
 
         // Загрузка информации о прошлом победителе на этой трассе (сезон 2025)
         // Загрузка информации о прошлом победителе на этой трассе (поиск по последним сезонам)
-    async function loadPreviousWinner(nextRace) {
-        const winnerContainer = document.getElementById('previous-winner-info');
-        if (!winnerContainer) return;
+    // Загрузка информации о прошлом победителе на этой трассе (поиск по названиям)
+async function loadPreviousWinner(nextRace) {
+    const winnerContainer = document.getElementById('previous-winner-info');
+    if (!winnerContainer) return;
 
-        const circuitId = nextRace.Circuit.circuitId;
-        const seasons = [2025, 2024, 2023]; // от самого свежего к более старым
+    const circuitName = nextRace.Circuit.circuitName;
+    const country = nextRace.Circuit.Location.country;
+    const seasons = [2025, 2024, 2023, 2022, 2021]; // Больше сезонов для поиска
 
-        for (const season of seasons) {
-            try {
-                const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=100`);
-                if (!response.ok) continue;
-                const data = await response.json();
-                const races = data.MRData.RaceTable.Races;
-                const pastRace = races.find(race => race.Circuit.circuitId === circuitId);
-                if (pastRace && pastRace.Results && pastRace.Results.length > 0) {
-                    const winner = pastRace.Results[0];
-                    const driver = winner.Driver;
-                    const constructor = winner.Constructor;
-                    const driverName = `${driver.givenName} ${driver.familyName}`;
-                    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=e10600&color=fff&size=100&rounded=true&bold=true`;
-                    const raceDate = new Date(pastRace.date);
-                    const formattedDate = raceDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-                    const time = winner.Time?.time || winner.status || '—';
-                    
-                    winnerContainer.innerHTML = `
-                        <div class="previous-winner-card">
-                            <div class="winner-photo">
-                                <img src="${avatarUrl}" alt="${driverName}">
-                            </div>
-                            <div class="winner-details">
-                                <div class="winner-label">ПОБЕДИТЕЛЬ НА ЭТОЙ ТРАССЕ (${season})</div>
-                                <div class="winner-name">${escapeHtml(driverName)}</div>
-                                <div class="winner-team">${escapeHtml(constructor.name)}</div>
-                                <div class="winner-date">📅 ${formattedDate}</div>
-                                <div class="winner-laps">Круги: ${winner.laps}</div>
-                                <div class="winner-time">⏱ Время: ${escapeHtml(time)}</div>
-                            </div>
+    for (const season of seasons) {
+        try {
+            const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=100`);
+            if (!response.ok) continue;
+            const data = await response.json();
+            const races = data.MRData.RaceTable.Races;
+            
+            // Ищем гонку, где название трассы или страна совпадают с текущей
+            const pastRace = races.find(race => 
+                race.Circuit.circuitName === circuitName || 
+                race.Circuit.Location.country === country
+            );
+            
+            if (pastRace && pastRace.Results && pastRace.Results.length > 0) {
+                const winner = pastRace.Results[0];
+                const driver = winner.Driver;
+                const constructor = winner.Constructor;
+                const driverName = `${driver.givenName} ${driver.familyName}`;
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=e10600&color=fff&size=100&rounded=true&bold=true`;
+                const raceDate = new Date(pastRace.date);
+                const formattedDate = raceDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                const time = winner.Time?.time || winner.status || '—';
+                
+                winnerContainer.innerHTML = `
+                    <div class="previous-winner-card">
+                        <div class="winner-photo">
+                            <img src="${avatarUrl}" alt="${driverName}">
                         </div>
-                    `;
-                    return;
-                }
-            } catch (err) {
-                console.warn(`Не удалось загрузить сезон ${season}:`, err);
+                        <div class="winner-details">
+                            <div class="winner-label">🏆 ПОБЕДИТЕЛЬ НА ЭТОЙ ТРАССЕ (${season})</div>
+                            <div class="winner-name">${escapeHtml(driverName)}</div>
+                            <div class="winner-team">${escapeHtml(constructor.name)}</div>
+                            <div class="winner-date">📅 ${formattedDate}</div>
+                            <div class="winner-laps">🏁 Круги: ${winner.laps}</div>
+                            <div class="winner-time">⏱ Время: ${escapeHtml(time)}</div>
+                        </div>
+                    </div>
+                `;
+                return;
             }
+        } catch (err) {
+            console.warn(`Не удалось загрузить сезон ${season}:`, err);
         }
-        // Если ничего не нашли
-        winnerContainer.innerHTML = `<div class="previous-winner-error">Нет данных о прошлом победителе для этой трассы</div>`;
     }
+    
+    // Если ничего не нашли — показываем красивую заглушку
+    winnerContainer.innerHTML = `
+        <div class="previous-winner-card placeholder">
+            <div class="winner-photo placeholder-icon">🏁</div>
+            <div class="winner-details">
+                <div class="winner-label">НЕТ ДАННЫХ О ПРОШЛОМ ПОБЕДИТЕЛЕ</div>
+                <div class="winner-name">Эта трасса ещё не проводила гонок в сезонах 2021–2025</div>
+                <div class="winner-team">Данные появятся после первой гонки</div>
+            </div>
+        </div>
+    `;
+}
 })();
