@@ -510,3 +510,78 @@ body {
         font-size: 1.3rem;
     }
 }
+
+
+/* Стили для блока прошлого победителя */
+.previous-winner {
+    margin-top: 2rem;
+    border-top: 1px solid #2a2a2a;
+    padding-top: 1.5rem;
+}
+
+.previous-winner-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 1rem 1.5rem;
+    flex-wrap: wrap;
+}
+
+.winner-photo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #e10600;
+    object-fit: cover;
+}
+
+.winner-details {
+    text-align: left;
+    flex: 1;
+}
+
+.winner-label {
+    font-size: 0.7rem;
+    color: #aaa;
+    letter-spacing: 1px;
+}
+
+.winner-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0.2rem 0;
+}
+
+.winner-team {
+    font-size: 0.9rem;
+    color: #e10600;
+}
+
+.winner-date, .winner-laps, .winner-time {
+    font-size: 0.8rem;
+    color: #ddd;
+    margin-top: 0.2rem;
+}
+
+.winner-time {
+    color: #ffcc00;
+}
+
+.previous-winner-error {
+    color: #ff6666;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+@media (max-width: 700px) {
+    .previous-winner-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    .winner-details {
+        text-align: center;
+    }
+}

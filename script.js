@@ -216,13 +216,14 @@
         }
     }
 
-    function displayRaceInfo(race, container) {
+        function displayRaceInfo(race, container) {
         const raceName = race.raceName;
         const circuit = race.Circuit.circuitName;
         const country = race.Circuit.Location.country;
         const raceDateObj = new Date(race.date);
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = raceDateObj.toLocaleDateString('ru-RU', options);
+        
         container.innerHTML = `
             <div class="countdown-card">
                 <h3>СЛЕДУЮЩАЯ ГОНКА</h3>
@@ -235,9 +236,12 @@
                     <div class="time-unit"><span id="minutes">00</span><span>Минут</span></div>
                     <div class="time-unit"><span id="seconds">00</span><span>Секунд</span></div>
                 </div>
-                <div class="loading-previous-winner">Загрузка информации о прошлом победителе...</div>
+                <div id="previous-winner-info" class="previous-winner">Загрузка информации о прошлом победителе...</div>
             </div>
         `;
+        
+        // Загружаем прошлого победителя
+        loadPreviousWinner(race);
     }
 
     function startCountdown(targetDate, container) {
@@ -328,4 +332,62 @@
         loadNextRaceData();
         loadResultsTable();
     });
+
+
+        // Загрузка информации о прошлом победителе на этой трассе (сезон 2025)
+    async function loadPreviousWinner(nextRace) {
+        const winnerContainer = document.getElementById('previous-winner-info');
+        if (!winnerContainer) return;
+
+        const circuitId = nextRace.Circuit.circuitId;
+        const season = 2025; // прошлый завершённый сезон
+
+        try {
+            const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=100`);
+            if (!response.ok) throw new Error('Не удалось загрузить данные прошлого сезона');
+            const data = await response.json();
+            const races = data.MRData.RaceTable.Races;
+            
+            // Ищем гонку с таким же circuitId
+            const pastRace = races.find(race => race.Circuit.circuitId === circuitId);
+            if (!pastRace || !pastRace.Results || pastRace.Results.length === 0) {
+                winnerContainer.innerHTML = `<div class="previous-winner-error">Нет данных о прошлом победителе для этой трассы</div>`;
+                return;
+            }
+            
+            const winner = pastRace.Results[0];
+            const driver = winner.Driver;
+            const constructor = winner.Constructor;
+            const driverName = `${driver.givenName} ${driver.familyName}`;
+            const initials = driver.givenName.charAt(0) + driver.familyName.charAt(0);
+            // Фото через ui-avatars (инициалы на красном фоне)
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=e10600&color=fff&size=100&rounded=true&bold=true`;
+            
+            // Дата прошлой гонки
+            const raceDate = new Date(pastRace.date);
+            const formattedDate = raceDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            // Время победителя
+            const time = winner.Time?.time || winner.status || '—';
+            
+            winnerContainer.innerHTML = `
+                <div class="previous-winner-card">
+                    <div class="winner-photo">
+                        <img src="${avatarUrl}" alt="${driverName}">
+                    </div>
+                    <div class="winner-details">
+                        <div class="winner-label">ПОБЕДИТЕЛЬ НА ЭТОЙ ТРАССЕ (${season})</div>
+                        <div class="winner-name">${escapeHtml(driverName)}</div>
+                        <div class="winner-team">${escapeHtml(constructor.name)}</div>
+                        <div class="winner-date">📅 ${formattedDate}</div>
+                        <div class="winner-laps">Круги: ${winner.laps}</div>
+                        <div class="winner-time">⏱ Время: ${escapeHtml(time)}</div>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Ошибка загрузки прошлого победителя:', error);
+            winnerContainer.innerHTML = `<div class="previous-winner-error">Не удалось загрузить данные о прошлом победителе</div>`;
+        }
+    }
 })();
