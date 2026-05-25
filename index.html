@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Формула 1 — слайдер</title>
+    <title>Формула 1 — главная</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,6 +25,8 @@
                 <li><a href="#">Гонки</a></li>
                 <li><a href="#">Команды</a></li>
                 <li><a href="#">Контакты</a></li>
+                <li><a href="#" id="myProfileBtn">Моя анкета</a></li>
+                <li><a href="#" id="adminBtn">Войти как админ</a></li>
             </ul>
         </div>
     </nav>
@@ -41,12 +43,67 @@
         </div>
         <div class="slider-dots" id="sliderDots"></div>
 
-        <!-- ДИНАМИЧЕСКАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ (загружается из API) -->
+        <!-- ДИНАМИЧЕСКАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ -->
         <div id="race-results-table"></div>
 
         <!-- БЛОК ОБРАТНОГО ОТСЧЁТА -->
         <div id="next-race-countdown" class="countdown-container">
             <div class="loading-indicator">Загрузка информации о следующей гонке...</div>
+        </div>
+
+        <!-- ГОЛОСОВАНИЕ (ДИАГРАММА) -->
+        <div class="poll-section">
+            <h2 class="section-title">ЛЮБИМЫЕ ГОНЩИКИ</h2>
+            <div id="poll-container" class="poll-container">
+                <div class="loading-indicator">Загрузка статистики...</div>
+            </div>
+        </div>
+
+        <!-- БЕГУЩАЯ ЛЕНТА КОММЕНТАРИЕВ -->
+        <div class="comments-ticker">
+            <div class="ticker-header">📢 ПОСЛЕДНИЕ КОММЕНТАРИИ</div>
+            <div class="ticker-wrap">
+                <div id="ticker-track" class="ticker-track">
+                    <div class="loading-indicator">Загрузка комментариев...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ФОРМА РЕГИСТРАЦИИ / ОТЗЫВА -->
+        <div class="form-section">
+            <h2 class="section-title">ЗАПОЛНИТЕ АНКЕТУ</h2>
+            <form id="user-form" class="user-form">
+                <div class="form-row">
+                    <input type="text" id="name" placeholder="Имя (только русские или только английские буквы)" required>
+                    <div class="field-error" id="name-error"></div>
+                </div>
+                <div class="form-row">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <div class="field-error" id="email-error"></div>
+                </div>
+                <div class="form-row">
+                    <input type="date" id="birthdate" required>
+                    <div class="field-error" id="birthdate-error"></div>
+                </div>
+                <div class="form-row">
+                    <label>Любимые гонщики (можно несколько):</label>
+                    <div id="drivers-checkboxes" class="drivers-grid">
+                        <!-- чекбоксы появятся через JS -->
+                    </div>
+                    <div class="field-error" id="drivers-error"></div>
+                </div>
+                <div class="form-row">
+                    <textarea id="comment" placeholder="Ваш комментарий (необязательно)" rows="4"></textarea>
+                </div>
+                <div class="form-row">
+                    <label>
+                        <input type="checkbox" id="terms" required> Я ознакомлен(а) с контрактом
+                    </label>
+                    <div class="field-error" id="terms-error"></div>
+                </div>
+                <button type="submit" id="submit-btn">ОТПРАВИТЬ</button>
+                <div id="form-message" class="form-message"></div>
+            </form>
         </div>
     </main>
 

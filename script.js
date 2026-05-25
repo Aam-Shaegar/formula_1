@@ -1,7 +1,7 @@
 (function() {
     console.log('✅ Бесконечная карусель Формулы 1');
 
-    // ---------- ГАМБУРГЕР (без изменений) ----------
+    // ---------- ГАМБУРГЕР ----------
     const hamburger = document.getElementById('hamburgerBtn');
     const navLinks = document.getElementById('navLinks');
     if (hamburger && navLinks) {
@@ -28,7 +28,7 @@
         }
     });
 
-    // ---------- БЕСКОНЕЧНАЯ КАРУСЕЛЬ (с клонированием) ----------
+    // ---------- КАРУСЕЛЬ (оставлена без изменений, только убрал дублирование) ----------
     const track = document.getElementById('sliderTrack');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -185,7 +185,7 @@
         });
     }
 
-    // --- Логика обратного отсчета до следующей гонки ---
+    // ---------- ОБРАТНЫЙ ОТСЧЁТ И ПРОШЛЫЙ ПОБЕДИТЕЛЬ (как было) ----------
     async function loadNextRaceData() {
         const container = document.getElementById('next-race-countdown');
         if (!container) return;
@@ -216,14 +216,13 @@
         }
     }
 
-        function displayRaceInfo(race, container) {
+    function displayRaceInfo(race, container) {
         const raceName = race.raceName;
         const circuit = race.Circuit.circuitName;
         const country = race.Circuit.Location.country;
         const raceDateObj = new Date(race.date);
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = raceDateObj.toLocaleDateString('ru-RU', options);
-        
         container.innerHTML = `
             <div class="countdown-card">
                 <h3>СЛЕДУЮЩАЯ ГОНКА</h3>
@@ -239,13 +238,12 @@
                 <div id="previous-winner-info" class="previous-winner">Загрузка информации о прошлом победителе...</div>
             </div>
         `;
-        
-        // Загружаем прошлого победителя
         loadPreviousWinner(race);
     }
 
     function startCountdown(targetDate, container) {
         const countDownDate = new Date(targetDate).getTime();
+        let timerInterval;
         const updateTimer = () => {
             const now = new Date().getTime();
             const distance = countDownDate - now;
@@ -267,7 +265,267 @@
             }
         };
         updateTimer();
-        const timerInterval = setInterval(updateTimer, 1000);
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    async function loadPreviousWinner(nextRace) {
+        const winnerContainer = document.getElementById('previous-winner-info');
+        if (!winnerContainer) return;
+        const circuitName = nextRace.Circuit.circuitName;
+        const country = nextRace.Circuit.Location.country;
+        const seasons = [2025, 2024, 2023, 2022, 2021];
+        for (const season of seasons) {
+            try {
+                const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=100`);
+                if (!response.ok) continue;
+                const data = await response.json();
+                const races = data.MRData.RaceTable.Races;
+                const pastRace = races.find(race => race.Circuit.circuitName === circuitName || race.Circuit.Location.country === country);
+                if (pastRace && pastRace.Results && pastRace.Results.length > 0) {
+                    const winner = pastRace.Results[0];
+                    const driver = winner.Driver;
+                    const constructor = winner.Constructor;
+                    const driverName = `${driver.givenName} ${driver.familyName}`;
+                    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=e10600&color=fff&size=100&rounded=true&bold=true`;
+                    const raceDate = new Date(pastRace.date);
+                    const formattedDate = raceDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const time = winner.Time?.time || winner.status || '—';
+                    winnerContainer.innerHTML = `
+                        <div class="previous-winner-card">
+                            <div class="winner-photo"><img src="${avatarUrl}" alt="${driverName}"></div>
+                            <div class="winner-details">
+                                <div class="winner-label">🏆 ПОБЕДИТЕЛЬ НА ЭТОЙ ТРАССЕ (${season})</div>
+                                <div class="winner-name">${escapeHtml(driverName)}</div>
+                                <div class="winner-team">${escapeHtml(constructor.name)}</div>
+                                <div class="winner-date">📅 ${formattedDate}</div>
+                                <div class="winner-laps">🏁 Круги: ${winner.laps}</div>
+                                <div class="winner-time">⏱ Время: ${escapeHtml(time)}</div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+            } catch (err) { console.warn(err); }
+        }
+        winnerContainer.innerHTML = `<div class="previous-winner-card placeholder"><div class="winner-photo placeholder-icon">🏁</div><div class="winner-details"><div class="winner-label">НЕТ ДАННЫХ О ПРОШЛОМ ПОБЕДИТЕЛЕ</div><div class="winner-name">Эта трасса ещё не проводила гонок в 2021–2025</div><div class="winner-team">Данные появятся после первой гонки</div></div></div>`;
+    }
+
+    // ========== ТАБЛИЦА РЕЗУЛЬТАТОВ (без изменений) ==========
+    async function loadResultsTable() {
+        const container = document.getElementById('race-results-table');
+        if (!container) return;
+        try {
+            const response = await fetch('https://api.jolpi.ca/ergast/f1/2026/results.json?limit=100');
+            if (!response.ok) throw new Error('Ошибка загрузки результатов');
+            const data = await response.json();
+            const races = data.MRData.RaceTable.Races;
+            if (!races || races.length === 0) throw new Error('Нет данных');
+            let html = `<div class="race-results"><h2 class="section-title">2026 RACE RESULTS</h2><div class="table-wrapper"><table class="results-table"><thead><tr><th>ГРАН-ПРИ</th><th>ДАТА</th><th>ПОБЕДИТЕЛЬ</th><th>КОМАНДА</th><th>КРУГИ</th><th>ВРЕМЯ</th></tr></thead><tbody>`;
+            for (const race of races) {
+                if (!race.Results || race.Results.length === 0) continue;
+                const winner = race.Results[0];
+                const driver = winner.Driver;
+                const constructor = winner.Constructor;
+                const time = winner.Time?.time || winner.status || '—';
+                const dateObj = new Date(race.date);
+                const formattedDate = `${dateObj.getDate().toString().padStart(2,'0')} ${dateObj.toLocaleString('ru', { month: 'short' }).replace('.','')}`;
+                html += `<tr><td>${escapeHtml(race.raceName)}</td><td>${formattedDate}</td><td>${escapeHtml(driver?.familyName || '—')}</td><td>${escapeHtml(constructor?.name || '—')}</td><td>${winner.laps || '—'}</td><td><strong>${escapeHtml(time)}</strong></td></tr>`;
+            }
+            html += `</tbody></table></div></div>`;
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = '<div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">⚠️ Не удалось загрузить результаты гонок</div>';
+        }
+    }
+
+    // ========== НОВЫЙ ФРОНТЕНД: голосование, лента, форма ==========
+    const driversList = [
+        "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Lando Norris",
+        "Carlos Sainz", "George Russell", "Sergio Pérez", "Fernando Alonso",
+        "Oscar Piastri", "Pierre Gasly", "Esteban Ocon", "Alexander Albon"
+    ];
+
+    // 1. Голосование (диаграмма)
+    async function loadPoll() {
+        const container = document.getElementById('poll-container');
+        if (!container) return;
+        try {
+            const res = await fetch('api/poll.php');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            renderPoll(data);
+        } catch (err) {
+            container.innerHTML = '<p class="error-message">Не удалось загрузить голосование</p>';
+        }
+    }
+
+    function renderPoll(votesObj) {
+        const container = document.getElementById('poll-container');
+        let total = 0;
+        for (let d of driversList) total += votesObj[d] || 0;
+        let html = '';
+        for (let driver of driversList) {
+            const count = votesObj[driver] || 0;
+            const percent = total ? (count/total*100).toFixed(1) : 0;
+            html += `
+                <div class="poll-bar">
+                    <div class="poll-driver">${escapeHtml(driver)}</div>
+                    <div class="poll-bar-bg"><div class="poll-bar-fill" style="width:${percent}%">${percent}%</div></div>
+                    <div class="poll-percent">${count} гол.</div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    // 2. Бегущая лента комментариев
+    async function loadTicker() {
+        const trackDiv = document.getElementById('ticker-track');
+        if (!trackDiv) return;
+        try {
+            const res = await fetch('api/comments.php');
+            if (!res.ok) throw new Error();
+            const comments = await res.json();
+            if (!comments.length) {
+                trackDiv.innerHTML = '<div class="ticker-item">Пока нет комментариев. Будьте первым!</div>';
+                return;
+            }
+            let html = '';
+            for (let i = 0; i < 2; i++) { // дублируем для плавности
+                comments.forEach(c => {
+                    html += `
+                        <div class="ticker-item" data-id="${c.id}">
+                            <div class="ticker-name">${escapeHtml(c.name)}</div>
+                            <div class="ticker-date">${escapeHtml(c.updated_at)}</div>
+                            <div class="ticker-comment">${escapeHtml(c.comment.substring(0, 150))}${c.comment.length>150?'…':''}</div>
+                        </div>
+                    `;
+                });
+            }
+            trackDiv.innerHTML = html;
+            // остановка по клику
+            document.querySelectorAll('.ticker-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    trackDiv.classList.toggle('paused');
+                });
+            });
+        } catch (err) {
+            trackDiv.innerHTML = '<div class="ticker-item">Ошибка загрузки комментариев</div>';
+        }
+    }
+
+    // 3. Форма регистрации
+    async function initForm() {
+        const form = document.getElementById('user-form');
+        if (!form) return;
+
+        // заполнение чекбоксов гонщиков
+        const driversContainer = document.getElementById('drivers-checkboxes');
+        if (driversContainer) {
+            driversContainer.innerHTML = '';
+            driversList.forEach(driver => {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="checkbox" name="drivers" value="${escapeHtml(driver)}"> ${escapeHtml(driver)}`;
+                driversContainer.appendChild(label);
+            });
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // Очистка предыдущих ошибок
+            document.querySelectorAll('.field-error').forEach(el => el.innerHTML = '');
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const birthdate = document.getElementById('birthdate').value;
+            const drivers = Array.from(document.querySelectorAll('input[name="drivers"]:checked')).map(cb => cb.value);
+            const comment = document.getElementById('comment').value.trim();
+            const terms = document.getElementById('terms').checked;
+
+            let hasError = false;
+
+            // Простейшая клиентская валидация (серверная тоже есть)
+            if (!/^[a-zA-Zа-яА-ЯёЁ]+$/.test(name) || (/[a-zA-Z]/.test(name) && /[а-яА-ЯёЁ]/.test(name))) {
+                showError('name-error', 'Имя должно содержать только русские или только английские буквы');
+                document.getElementById('name').classList.add('error');
+                hasError = true;
+            }
+            if (!email.includes('@') || !email.includes('.')) {
+                showError('email-error', 'Неверный формат email');
+                document.getElementById('email').classList.add('error');
+                hasError = true;
+            }
+            if (!birthdate) {
+                showError('birthdate-error', 'Введите дату рождения');
+                document.getElementById('birthdate').classList.add('error');
+                hasError = true;
+            } else {
+                const age = new Date().getFullYear() - new Date(birthdate).getFullYear();
+                if (age < 12) {
+                    showError('birthdate-error', 'Вам должно быть не менее 12 лет');
+                    document.getElementById('birthdate').classList.add('error');
+                    hasError = true;
+                }
+            }
+            if (drivers.length === 0) {
+                showError('drivers-error', 'Выберите хотя бы одного гонщика');
+                document.getElementById('drivers-checkboxes').classList.add('error');
+                hasError = true;
+            }
+            if (!terms) {
+                showError('terms-error', 'Необходимо подтвердить ознакомление с контрактом');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            const msgDiv = document.getElementById('form-message');
+            msgDiv.innerHTML = 'Отправка...';
+
+            try {
+                const res = await fetch('api/register.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, birthdate, drivers, comment, terms })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    msgDiv.innerHTML = `<span style="color: #4caf50;">✅ Регистрация успешна!<br>Логин: ${escapeHtml(data.email)}<br>Пароль: <strong>${escapeHtml(data.password)}</strong><br>Сохраните пароль, он больше не будет показан.</span>`;
+                    form.reset();
+                    loadTicker(); // обновляем ленту
+                    loadPoll();   // обновляем диаграмму
+                    setTimeout(() => { msgDiv.innerHTML = ''; }, 15000);
+                } else {
+                    let errorMsg = '';
+                    switch (data.error) {
+                        case 'name_invalid': errorMsg = 'Имя содержит недопустимые символы или смешаны алфавиты'; break;
+                        case 'name_length': errorMsg = 'Имя слишком длинное'; break;
+                        case 'email_invalid': errorMsg = 'Неверный формат email'; break;
+                        case 'email_length': errorMsg = 'Email слишком длинный'; break;
+                        case 'birthdate_invalid': errorMsg = 'Неверная дата рождения'; break;
+                        case 'age_too_young': errorMsg = 'Вам должно быть не менее 12 лет'; break;
+                        case 'drivers_empty': errorMsg = 'Выберите хотя бы одного гонщика'; break;
+                        case 'terms_not_accepted': errorMsg = 'Подтвердите ознакомление с контрактом'; break;
+                        case 'email_exists': errorMsg = 'Этот email уже зарегистрирован'; break;
+                        default: errorMsg = 'Ошибка сервера';
+                    }
+                    msgDiv.innerHTML = `<span style="color: #ff6666;">❌ ${errorMsg}</span>`;
+                }
+            } catch (err) {
+                msgDiv.innerHTML = '<span style="color: #ff6666;">❌ Ошибка соединения с сервером</span>';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    }
+
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        if (el) el.innerHTML = message;
     }
 
     function escapeHtml(str) {
@@ -280,126 +538,18 @@
         });
     }
 
-    // ========== ТАБЛИЦА РЕЗУЛЬТАТОВ (динамическая) ==========
-    async function loadResultsTable() {
-        const container = document.getElementById('race-results-table');
-        if (!container) return;
-        try {
-            const response = await fetch('https://api.jolpi.ca/ergast/f1/2026/results.json?limit=100');
-            if (!response.ok) throw new Error('Ошибка загрузки результатов');
-            const data = await response.json();
-            const races = data.MRData.RaceTable.Races;
-            if (!races || races.length === 0) throw new Error('Нет данных');
-            let html = `
-                <div class="race-results">
-                    <h2 class="section-title">2026 RACE RESULTS</h2>
-                    <div class="table-wrapper">
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>ГРАН-ПРИ</th><th>ДАТА</th><th>ПОБЕДИТЕЛЬ</th><th>КОМАНДА</th><th>КРУГИ</th><th>ВРЕМЯ</th></tr>
-                            </thead>
-                            <tbody>
-            `;
-            for (const race of races) {
-                if (!race.Results || race.Results.length === 0) continue;
-                const winner = race.Results[0];
-                const driver = winner.Driver;
-                const constructor = winner.Constructor;
-                const time = winner.Time?.time || winner.status || '—';
-                const dateObj = new Date(race.date);
-                const formattedDate = `${dateObj.getDate().toString().padStart(2,'0')} ${dateObj.toLocaleString('ru', { month: 'short' }).replace('.','')}`;
-                html += `
-                    <tr>
-                        <td>${escapeHtml(race.raceName)}</td>
-                        <td>${formattedDate}</td>
-                        <td>${escapeHtml(driver?.familyName || '—')}</td>
-                        <td>${escapeHtml(constructor?.name || '—')}</td>
-                        <td>${winner.laps || '—'}</td>
-                        <td><strong>${escapeHtml(time)}</strong></td>
-                    </tr>
-                `;
-            }
-            html += `</tbody></table></div></div>`;
-            container.innerHTML = html;
-        } catch (error) {
-            console.error('Таблица не загружена:', error);
-            container.innerHTML = '<div class="error-message" style="text-align:center; color:#ff6666; padding:2rem;">⚠️ Не удалось загрузить результаты гонок</div>';
-        }
-    }
-
-    // Запускаем обе функции после загрузки страницы
+    // Запуск всех функций при загрузке DOM
     document.addEventListener('DOMContentLoaded', () => {
         loadNextRaceData();
         loadResultsTable();
+        loadPoll();
+        loadTicker();
+        initForm();
     });
 
-
-        // Загрузка информации о прошлом победителе на этой трассе (сезон 2025)
-        // Загрузка информации о прошлом победителе на этой трассе (поиск по последним сезонам)
-    // Загрузка информации о прошлом победителе на этой трассе (поиск по названиям)
-async function loadPreviousWinner(nextRace) {
-    const winnerContainer = document.getElementById('previous-winner-info');
-    if (!winnerContainer) return;
-
-    const circuitName = nextRace.Circuit.circuitName;
-    const country = nextRace.Circuit.Location.country;
-    const seasons = [2025, 2024, 2023, 2022, 2021]; // Больше сезонов для поиска
-
-    for (const season of seasons) {
-        try {
-            const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=100`);
-            if (!response.ok) continue;
-            const data = await response.json();
-            const races = data.MRData.RaceTable.Races;
-            
-            // Ищем гонку, где название трассы или страна совпадают с текущей
-            const pastRace = races.find(race => 
-                race.Circuit.circuitName === circuitName || 
-                race.Circuit.Location.country === country
-            );
-            
-            if (pastRace && pastRace.Results && pastRace.Results.length > 0) {
-                const winner = pastRace.Results[0];
-                const driver = winner.Driver;
-                const constructor = winner.Constructor;
-                const driverName = `${driver.givenName} ${driver.familyName}`;
-                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=e10600&color=fff&size=100&rounded=true&bold=true`;
-                const raceDate = new Date(pastRace.date);
-                const formattedDate = raceDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-                const time = winner.Time?.time || winner.status || '—';
-                
-                winnerContainer.innerHTML = `
-                    <div class="previous-winner-card">
-                        <div class="winner-photo">
-                            <img src="${avatarUrl}" alt="${driverName}">
-                        </div>
-                        <div class="winner-details">
-                            <div class="winner-label">🏆 ПОБЕДИТЕЛЬ НА ЭТОЙ ТРАССЕ (${season})</div>
-                            <div class="winner-name">${escapeHtml(driverName)}</div>
-                            <div class="winner-team">${escapeHtml(constructor.name)}</div>
-                            <div class="winner-date">📅 ${formattedDate}</div>
-                            <div class="winner-laps">🏁 Круги: ${winner.laps}</div>
-                            <div class="winner-time">⏱ Время: ${escapeHtml(time)}</div>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-        } catch (err) {
-            console.warn(`Не удалось загрузить сезон ${season}:`, err);
-        }
-    }
-    
-    // Если ничего не нашли — показываем красивую заглушку
-    winnerContainer.innerHTML = `
-        <div class="previous-winner-card placeholder">
-            <div class="winner-photo placeholder-icon">🏁</div>
-            <div class="winner-details">
-                <div class="winner-label">НЕТ ДАННЫХ О ПРОШЛОМ ПОБЕДИТЕЛЕ</div>
-                <div class="winner-name">Эта трасса ещё не проводила гонок в сезонах 2021–2025</div>
-                <div class="winner-team">Данные появятся после первой гонки</div>
-            </div>
-        </div>
-    `;
-}
+    // Кнопки навигации
+    const profileBtn = document.getElementById('myProfileBtn');
+    if (profileBtn) profileBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'login.html'; });
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/index.php'; });
 })();

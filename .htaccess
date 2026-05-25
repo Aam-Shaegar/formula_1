@@ -1,0 +1,5 @@
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+SetEnv DB_DSN "u82416:8823102@tcp(localhost:3306)/u82416"
+SetEnv JWT_SECRET "it-is-the-most-top-secret-key-from-Epstein's-files"

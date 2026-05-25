@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя анкета</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="form-section" style="max-width: 800px; margin: 2rem auto;">
+        <h2 class="section-title">Редактирование анкеты</h2>
+        <form id="profile-form" class="user-form">
+            <div class="form-row"><input type="text" id="profile-name" placeholder="Имя" required><div class="field-error" id="name-error"></div></div>
+            <div class="form-row"><input type="date" id="profile-birthdate" required><div class="field-error" id="birthdate-error"></div></div>
+            <div class="form-row"><textarea id="profile-comment" placeholder="Комментарий" rows="4"></textarea></div>
+            <div class="form-row"><label>Любимые гонщики:</label><div id="profile-drivers" class="drivers-grid"></div><div class="field-error" id="drivers-error"></div></div>
+            <button type="submit" id="saveBtn">Сохранить изменения</button>
+            <button type="button" id="backToHome">На главную</button>
+            <div id="profile-message"></div>
+        </form>
+    </div>
+    <script>
+        const driversList = ["Max Verstappen","Lewis Hamilton","Charles Leclerc","Lando Norris","Carlos Sainz","George Russell","Sergio Pérez","Fernando Alonso","Oscar Piastri","Pierre Gasly","Esteban Ocon","Alexander Albon"];
+
+        async function loadProfile() {
+            const token = localStorage.getItem('f1_token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            try {
+                const res = await fetch('api/profile.php', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                document.getElementById('profile-name').value = data.name;
+                document.getElementById('profile-birthdate').value = data.birthdate;
+                document.getElementById('profile-comment').value = data.comment || '';
+                const favorites = data.favorite_drivers ? data.favorite_drivers.split(',') : [];
+                const container = document.getElementById('profile-drivers');
+                container.innerHTML = '';
+                driversList.forEach(driver => {
+                    const checked = favorites.includes(driver);
+                    container.innerHTML += `<label><input type="checkbox" name="drivers" value="${escapeHtml(driver)}" ${checked ? 'checked' : ''}> ${escapeHtml(driver)}</label>`;
+                });
+            } catch (err) {
+                localStorage.removeItem('f1_token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('f1_token');
+            if (!token) return;
+            const name = document.getElementById('profile-name').value.trim();
+            const birthdate = document.getElementById('profile-birthdate').value;
+            const comment = document.getElementById('profile-comment').value.trim();
+            const drivers = Array.from(document.querySelectorAll('#profile-drivers input:checked')).map(cb => cb.value);
+            // простая валидация
+            if (!name || !birthdate || drivers.length === 0) {
+                document.getElementById('profile-message').innerHTML = 'Заполните все обязательные поля';
+                return;
+            }
+            try {
+                const res = await fetch('api/profile.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ name, birthdate, comment, drivers })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('profile-message').innerHTML = '<span style="color: #4caf50;">Изменения сохранены</span>';
+                } else {
+                    document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">Ошибка сохранения</span>';
+                }
+            } catch (err) {
+                document.getElementById('profile-message').innerHTML = '<span style="color: #ff6666;">Ошибка сервера</span>';
+            }
+        });
+
+        document.getElementById('backToHome').addEventListener('click', () => { window.location.href = 'index.html'; });
+        function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
+        loadProfile();
+    </script>
+</body>
+</html>

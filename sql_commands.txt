@@ -1,0 +1,49 @@
+-- Таблица гонщиков
+CREATE TABLE drivers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- Таблица пользователей
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    birthdate DATE NOT NULL,
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Связка пользователь-гонщик
+CREATE TABLE users_drivers (
+    user_id INT NOT NULL,
+    driver_id INT NOT NULL,
+    PRIMARY KEY (user_id, driver_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (driver_id) REFERENCES drivers(id) ON DELETE CASCADE
+);
+
+-- Админские учётные данные (вручную)
+CREATE TABLE admin_credentials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
+
+-- Заполняем гонщиков
+INSERT INTO drivers (name) VALUES 
+('Max Verstappen'), ('Lewis Hamilton'), ('Charles Leclerc'), ('Lando Norris'),
+('Carlos Sainz'), ('George Russell'), ('Sergio Pérez'), ('Fernando Alonso'),
+('Oscar Piastri'), ('Pierre Gasly'), ('Esteban Ocon'), ('Alexander Albon');
+
+CREATE TABLE IF NOT EXISTS admin_credentials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL
+);
+
+-- Вставка админа (пароль 'admin' захеширован)
+INSERT INTO admin_credentials (name, password_hash) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+-- (пароль 'password' — для теста, замените на свой)

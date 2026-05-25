@@ -1,587 +1,187 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background-color: #0b0b0b;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    color: #ffffff;
-    line-height: 1.4;
-}
-
-/* панель навигации */
-.navbar {
-    background-color: #000000dd;
-    backdrop-filter: blur(2px);
-    padding: 0.9rem 2rem;
-    border-bottom: 1px solid #2a2a2a;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 100;
-}
-
-.nav-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    position: relative;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.logo {
-    height: 48px;
-    width: auto;
-    filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));
-    transition: transform 0.2s ease;
-}
-
-.logo:hover {
-    transform: scale(1.02);
-}
-
-.brand-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #e10600, #ffffff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 8px rgba(225,6,0,0.3);
-}
-
-.hamburger {
-    display: none;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 21px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    z-index: 110;
-}
-
-.hamburger-line {
-    width: 100%;
-    height: 3px;
-    background-color: #ffffff;
-    border-radius: 3px;
-    transition: all 0.3s ease;
-}
-
-.hamburger.active .hamburger-line:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
-}
-.hamburger.active .hamburger-line:nth-child(2) {
-    opacity: 0;
-}
-.hamburger.active .hamburger-line:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg);
-}
-
-.nav-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-    transition: all 0.3s ease;
-}
-
-.nav-links a {
-    color: #e0e0e0;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: color 0.2s, border-bottom 0.2s;
-    padding-bottom: 4px;
-    border-bottom: 2px solid transparent;
-}
-
-.nav-links a:hover {
-    color: #ff4d4d;
-    border-bottom-color: #e10600;
-}
-
-/* основной контент */
-.main-content {
-    max-width: 1400px;
-    margin: 2rem auto;
-    padding: 0 2rem 4rem;
-}
-
-/* огромный заголовок */
-.hero-title {
-    font-size: clamp(3rem, 12vw, 8rem);
-    font-weight: 900;
-    text-align: center;
-    letter-spacing: 0.1em;
-    background: linear-gradient(135deg, #e10600, #ff6a00, #ffffff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    text-transform: uppercase;
-    margin: 1rem 0 2rem 0;
-    text-shadow: 0 0 20px rgba(225,6,0,0.5);
-    animation: fadeInUp 0.8s ease;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ===== СЛАЙДЕР — БЕЗ ОБРЕЗКИ, СЖАТИЕ ПОЛНОСТЬЮ ===== */
-.slider-container {
-    position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: 2rem auto;
-    border-radius: 28px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    background-color: #0a0a0a;
-}
-
-.slider-track {
-    display: flex;
-    transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    will-change: transform;
-}
-
-.slider-track img {
-    width: 100%;          /* ширина на весь контейнер */
-    height: auto;         /* высота автоматически пропорциональна ширине */
-    flex-shrink: 0;
-    display: block;
-    background-color: #1a1a1a;
-}
-
-/* Стеклянные кнопки */
-.slider-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-
-.slider-btn:hover {
-    background: rgba(255, 255, 255, 0.4);
-    transform: translateY(-50%) scale(1.05);
-    border-color: rgba(255,255,255,0.6);
-}
-
-.slider-btn:active {
-    transform: translateY(-50%) scale(0.95);
-}
-
-.prev-btn {
-    left: 20px;
-}
-
-.next-btn {
-    right: 20px;
-}
-
-/* Индикаторы (точки) */
-.slider-dots {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.dot {
-    width: 12px;
-    height: 12px;
-    background-color: rgba(255,255,255,0.4);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.dot.active {
-    background-color: #e10600;
-    transform: scale(1.2);
-    box-shadow: 0 0 8px #e10600;
-}
-
-/* Адаптив кнопок и контейнера */
-@media (max-width: 768px) {
-    .slider-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
-    }
-    .prev-btn {
-        left: 10px;
-    }
-    .next-btn {
-        right: 10px;
-    }
-    .slider-container {
-        border-radius: 20px;
-    }
-}
-
-/* Адаптивные стили для навигации (оставлены без изменений) */
-@media (max-width: 768px) {
-    .navbar {
-        padding: 0.7rem 1rem;
-    }
-    .brand-title {
-        font-size: 1.3rem;
-        letter-spacing: 2px;
-    }
-    .logo {
-        height: 36px;
-    }
-    .hamburger {
-        display: flex;
-    }
-    .nav-links {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        flex-direction: column;
-        background-color: #0a0a0a;
-        backdrop-filter: blur(8px);
-        padding: 1rem 0;
-        gap: 1rem;
-        text-align: center;
-        border-top: 1px solid #2a2a2a;
-        border-bottom: 1px solid #2a2a2a;
-        transform: translateY(-120%);
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        z-index: 99;
-    }
-    .nav-links.active {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-    }
-    .nav-links li {
-        width: 100%;
-        padding: 0.5rem 0;
-    }
-    .nav-links a {
-        display: inline-block;
-        font-size: 1.2rem;
-        border-bottom: none;
-    }
-    .main-content {
-        padding: 1rem;
-        margin: 1rem auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .brand-title {
-        font-size: 1rem;
-        letter-spacing: 1px;
-    }
-    .logo {
-        height: 28px;
-    }
-    .nav-container {
-        gap: 0.5rem;
-    }
-}
-
-
-/* ===== СТАТИЧЕСКАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ ===== */
-.race-results {
+/* ===== ГОЛОСОВАНИЕ (СТОЛБЦЫ) ===== */
+.poll-section {
     margin: 4rem auto 2rem;
-    max-width: 1400px;
-    padding: 0 1rem;
-}
-
-.section-title {
-    font-size: 2rem;
-    font-weight: 700;
-    text-align: center;
-    letter-spacing: 2px;
-    margin-bottom: 2rem;
-    background: linear-gradient(135deg, #e10600, #ffffff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    text-transform: uppercase;
-}
-
-.table-wrapper {
-    overflow-x: auto;
-    border-radius: 20px;
-    background: rgba(10, 10, 10, 0.7);
-    backdrop-filter: blur(4px);
-    border: 1px solid #2a2a2a;
-}
-
-.results-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'Segoe UI', 'Roboto', monospace;
-    font-size: 0.95rem;
-    min-width: 700px;
-}
-
-.results-table th,
-.results-table td {
-    padding: 1rem 1.2rem;
-    text-align: left;
-    border-bottom: 1px solid #2a2a2a;
-}
-
-.results-table th {
-    background-color: #1a1a1a;
-    color: #e10600;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 0.85rem;
-}
-
-.results-table tr:hover {
-    background-color: rgba(225, 6, 0, 0.1);
-    transition: background 0.2s;
-}
-
-.results-table td {
-    color: #e0e0e0;
-}
-
-.results-table td strong {
-    color: #ffcc00;
-    font-weight: 700;
-}
-
-@media (max-width: 900px) {
-    .results-table th,
-    .results-table td {
-        padding: 0.7rem 0.8rem;
-        font-size: 0.8rem;
-    }
-    .section-title {
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .results-table th,
-    .results-table td {
-        padding: 0.5rem 0.6rem;
-        font-size: 0.7rem;
-    }
-}
-
-
-
-
-
-
-/* Стили для блока обратного отсчёта */
-.countdown-container {
     max-width: 1200px;
-    margin: 3rem auto;
     padding: 0 1rem;
 }
-
-.countdown-card {
-    background: rgba(10, 10, 10, 0.7);
+.poll-container {
+    background: rgba(10,10,10,0.7);
     backdrop-filter: blur(4px);
-    border: 1px solid #2a2a2a;
     border-radius: 28px;
     padding: 2rem;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    transition: transform 0.3s ease;
 }
-
-.countdown-card h3 {
-    color: #e10600;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
-}
-
-.race-name {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #e10600, #ffffff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-}
-
-.race-circuit {
-    color: #aaa;
-    margin-bottom: 1rem;
-}
-
-.race-date {
-    color: #ffcc00;
-    margin-bottom: 1.5rem;
-}
-
-.countdown-timer {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin: 1.5rem 0;
-}
-
-.time-unit {
-    display: flex;
-    flex-direction: column;
-    background: #1a1a1a;
-    padding: 0.75rem 1.5rem;
-    border-radius: 16px;
-    min-width: 80px;
-}
-
-.time-unit span:first-child {
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: monospace;
-}
-
-.time-unit span:last-child {
-    font-size: 0.8rem;
-    color: #aaa;
-}
-
-.loading-indicator, .loading-previous-winner {
-    color: #aaa;
-    text-align: center;
-    padding: 1rem;
-}
-
-@media (max-width: 700px) {
-    .countdown-timer {
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    .time-unit {
-        min-width: 60px;
-        padding: 0.5rem;
-    }
-    .time-unit span:first-child {
-        font-size: 1.2rem;
-    }
-    .race-name {
-        font-size: 1.3rem;
-    }
-}
-
-
-/* Стили для блока прошлого победителя */
-.previous-winner {
-    margin-top: 2rem;
-    border-top: 1px solid #2a2a2a;
-    padding-top: 1.5rem;
-}
-
-.previous-winner-card {
+.poll-bar {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 20px;
-    padding: 1rem 1.5rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
     flex-wrap: wrap;
 }
-
-.winner-photo img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 2px solid #e10600;
-    object-fit: cover;
+.poll-driver {
+    width: 140px;
+    font-weight: bold;
 }
-
-.winner-details {
-    text-align: left;
+.poll-bar-bg {
     flex: 1;
+    height: 30px;
+    background-color: #2a2a2a;
+    border-radius: 15px;
+    overflow: hidden;
+}
+.poll-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e10600, #ff6a00);
+    width: 0%;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-weight: bold;
+}
+.poll-percent {
+    min-width: 80px;
+    text-align: right;
 }
 
-.winner-label {
-    font-size: 0.7rem;
-    color: #aaa;
-    letter-spacing: 1px;
+/* ===== БЕГУЩАЯ ЛЕНТА ===== */
+.comments-ticker {
+    margin: 2rem auto;
+    max-width: 1200px;
+    padding: 0 1rem;
 }
-
-.winner-name {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin: 0.2rem 0;
-}
-
-.winner-team {
-    font-size: 0.9rem;
+.ticker-header {
+    background: #1a1a1a;
+    padding: 0.5rem 1rem;
+    border-radius: 16px 16px 0 0;
+    font-weight: bold;
     color: #e10600;
 }
-
-.winner-date, .winner-laps, .winner-time {
-    font-size: 0.8rem;
-    color: #ddd;
-    margin-top: 0.2rem;
+.ticker-wrap {
+    background: #0a0a0a;
+    border-radius: 0 0 16px 16px;
+    overflow-x: hidden;
+    position: relative;
 }
-
-.winner-time {
+.ticker-track {
+    display: flex;
+    gap: 2rem;
+    animation: ticker-scroll 30s linear infinite;
+    padding: 1rem 0;
+}
+.ticker-track.paused {
+    animation-play-state: paused;
+}
+.ticker-item {
+    background: rgba(225,6,0,0.2);
+    border-left: 3px solid #e10600;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    min-width: 280px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.ticker-item:hover {
+    background: rgba(225,6,0,0.4);
+    transform: scale(1.02);
+}
+.ticker-name {
+    font-weight: bold;
     color: #ffcc00;
 }
-
-.previous-winner-error {
-    color: #ff6666;
+.ticker-date {
+    font-size: 0.7rem;
+    color: #aaa;
+}
+.ticker-comment {
     font-size: 0.9rem;
-    text-align: center;
-    padding: 1rem;
+    margin-top: 4px;
+}
+@keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
+/* ===== ФОРМА ===== */
+.form-section {
+    margin: 4rem auto;
+    max-width: 800px;
+    padding: 0 1rem;
+}
+.user-form {
+    background: rgba(10,10,10,0.7);
+    backdrop-filter: blur(4px);
+    border-radius: 28px;
+    padding: 2rem;
+    border: 1px solid #2a2a2a;
+}
+.form-row {
+    margin-bottom: 1.5rem;
+}
+.form-row input, .form-row textarea {
+    width: 100%;
+    padding: 0.8rem;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+}
+.form-row input:focus, .form-row textarea:focus {
+    outline: none;
+    border-color: #e10600;
+}
+.form-row input.error, .form-row textarea.error, .drivers-grid.error {
+    border: 1px solid #ff4444;
+    background: #2a0a0a;
+}
+.field-error {
+    color: #ff6666;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+}
+.drivers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #333;
+    border-radius: 12px;
+}
+.drivers-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.user-form button {
+    background: #e10600;
+    border: none;
+    padding: 1rem;
+    width: 100%;
+    border-radius: 40px;
+    font-weight: bold;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.user-form button:hover {
+    background: #ff2e1c;
+}
+.form-message {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
 @media (max-width: 700px) {
-    .previous-winner-card {
+    .poll-bar {
         flex-direction: column;
-        text-align: center;
+        align-items: flex-start;
     }
-    .winner-details {
-        text-align: center;
-    }
+    .poll-driver { width: 100%; }
+    .poll-bar-bg { width: 100%; }
+    .ticker-track { gap: 1rem; }
 }
