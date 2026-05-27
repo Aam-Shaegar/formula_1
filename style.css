@@ -800,3 +800,69 @@ body {
         max-width: 320px;
     }
 }
+
+
+
+/* ===== ТОП ГОНЩИКИ (2 ряда по 2 фото) ===== */
+.top-racers-section {
+    margin: 4rem auto 2rem;
+    max-width: 1200px;
+    padding: 0 1rem;
+}
+.top-racers-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    background: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(4px);
+    border-radius: 28px;
+    padding: 1.5rem;
+}
+.top-racer-card {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 24px;
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s ease;
+    border: 1px solid #2a2a2a;
+}
+.top-racer-card:hover {
+    transform: translateY(-5px);
+    border-color: #e10600;
+}
+.top-racer-card img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+}
+.top-racer-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 0.8rem;
+    color: #e10600;
+}
+.top-racer-team {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .top-racers-grid {
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .top-racer-name {
+        font-size: 1rem;
+    }
+    .top-racer-team {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-racers-grid {
+        grid-template-columns: 1fr; /* на телефонах в 1 столбец */
+    }
+}
