@@ -762,8 +762,8 @@ body {
 }
 .racers-flow-track img {
     width: auto;
-    min-width: 620px;
-    max-width: 650px;
+    min-width: 520px;
+    max-width: 550px;
     height: auto;
     object-fit: contain;
     border-radius: 20px;

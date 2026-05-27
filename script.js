@@ -472,26 +472,35 @@
     if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/index.php'; });
 
         // ---------- БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ (горизонтальный скролл с ускорением) ----------
+        // ---------- БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ (бесконечный скролл с дублированием) ----------
     async function initRacersFlow() {
         const track = document.getElementById('racersFlowTrack');
         if (!track) return;
         
         const totalRacers = 22;
+        const repeatCount = 3; // повторяем набор 3 раза для бесконечного эффекта
         let html = '';
         
-        // Все картинки подряд (без дублирования, просто скролл)
-        for (let i = 1; i <= totalRacers; i++) {
-            html += `<img src="./images/racers_flow/${i}.png" alt="Гонщик ${i}" loading="lazy" onerror="this.style.opacity='0.5'; this.style.minWidth='200px';">`;
+        // Создаём 3 копии всех картинок подряд
+        for (let repeat = 0; repeat < repeatCount; repeat++) {
+            for (let i = 1; i <= totalRacers; i++) {
+                html += `<img src="./images/racers_flow/${i}.png" alt="Гонщик ${i}" loading="lazy" onerror="this.style.opacity='0.5'">`;
+            }
         }
         track.innerHTML = html;
         
         const container = document.querySelector('.racers-flow-container');
         if (!container) return;
         
+        // Устанавливаем начальную позицию на середину (второй набор)
+        const imageWidth = 650; // примерная ширина картинки + gap 1rem = ~666px
+        const setWidth = totalRacers * (imageWidth + 16); // + gap
+        const startPosition = setWidth; // начинаем со второго набора
+        container.scrollLeft = startPosition;
+        
         // Плавная прокрутка с инерцией
         let scrollSpeed = 0;
         let scrollInterval = null;
-        let lastTimestamp = 0;
         
         function smoothScroll() {
             if (Math.abs(scrollSpeed) < 0.3) {
@@ -502,20 +511,28 @@
                 return;
             }
             container.scrollLeft += scrollSpeed;
-            scrollSpeed *= 0.96; // затухание
+            scrollSpeed *= 0.96;
+            
+            // Бесконечная прокрутка: проверяем границы
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            if (container.scrollLeft <= 0) {
+                // Перепрыгиваем в конец второго набора (почти в конец)
+                container.scrollLeft = maxScroll - setWidth;
+            } else if (container.scrollLeft >= maxScroll) {
+                // Перепрыгиваем в начало второго набора
+                container.scrollLeft = setWidth;
+            }
         }
         
         container.addEventListener('wheel', (e) => {
             e.preventDefault();
-            // Увеличиваем влияние колесика
             scrollSpeed += e.deltaY * 0.8;
             if (!scrollInterval) {
                 scrollInterval = setInterval(smoothScroll, 16);
             }
         }, { passive: false });
         
-        // Для мобильных: обычный свайп работает через overflow-x: auto
-        // Дополнительно: небольшая автоматическая прокрутка, если не взаимодействуют (опционально, можно отключить)
+        // Автоматическая медленная прокрутка (можно отключить)
         let autoScrollInterval;
         let isUserInteracting = false;
         
@@ -523,19 +540,21 @@
             if (autoScrollInterval) clearInterval(autoScrollInterval);
             autoScrollInterval = setInterval(() => {
                 if (!isUserInteracting) {
-                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
-                        container.scrollLeft = 0;
-                    } else {
-                        container.scrollLeft += 1.5;
+                    container.scrollLeft += 2;
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+                    if (container.scrollLeft >= maxScroll) {
+                        container.scrollLeft = setWidth;
+                    } else if (container.scrollLeft <= 0) {
+                        container.scrollLeft = maxScroll - setWidth;
                     }
                 }
-            }, 40);
+            }, 30);
         }
         
         container.addEventListener('mouseenter', () => { isUserInteracting = true; });
         container.addEventListener('mouseleave', () => { isUserInteracting = false; });
         container.addEventListener('touchstart', () => { isUserInteracting = true; });
-        container.addEventListener('touchend', () => { setTimeout(() => { isUserInteracting = false; }, 1500); });
+        container.addEventListener('touchend', () => { setTimeout(() => { isUserInteracting = false; }, 1000); });
         
         // Запускаем автоскролл (можно закомментировать, если не нужно)
         startAutoScroll();
