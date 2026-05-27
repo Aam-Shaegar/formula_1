@@ -47,3 +47,6 @@ CREATE TABLE IF NOT EXISTS admin_credentials (
 -- Вставка админа (пароль 'admin' захеширован)
 INSERT INTO admin_credentials (name, password_hash) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 -- (пароль 'password' — для теста, замените на свой)
+
+
+vT82F4YDEq

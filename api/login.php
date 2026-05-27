@@ -1,10 +1,18 @@
 <?php
 require_once '../db.php';
-require_once '../vendor/autoload.php'; // если используете composer для firebase/php-jwt
-// Если нет композера, скачайте библиотеку вручную или используйте простую самодельную JWT (я покажу упрощённый вариант)
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+function base64url_encode($data) {
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+
+function generateSimpleJWT($payload, $secret) {
+    $header = json_encode(['alg' => 'HS256', 'typ' => 'JWT']);
+    $base64UrlHeader = base64url_encode($header);
+    $base64UrlPayload = base64url_encode(json_encode($payload));
+    $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
+    $base64UrlSignature = base64url_encode($signature);
+    return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
+}
 
 $input = json_decode(file_get_contents('php://input'), true);
 $email = trim($input['email'] ?? '');
@@ -28,9 +36,7 @@ if (!$user || !password_verify($password, $user['password_hash'])) {
 
 $secret = getenv('JWT_SECRET');
 if (!$secret) {
-    http_response_code(500);
-    echo json_encode(['error' => 'JWT_SECRET not set']);
-    exit;
+    $secret = 'it-is-the-most-top-secret-key-from-Epstein-s-files'; // запасной вариант
 }
 
 $payload = [
@@ -38,6 +44,7 @@ $payload = [
     'email' => $user['email'],
     'exp' => time() + 3600 // 1 час
 ];
-$jwt = JWT::encode($payload, $secret, 'HS256');
+$jwt = generateSimpleJWT($payload, $secret);
 
 echo json_encode(['token' => $jwt]);
+?>

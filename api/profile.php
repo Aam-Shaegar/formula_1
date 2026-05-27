@@ -1,12 +1,25 @@
 <?php
 require_once '../db.php';
-require_once '../vendor/autoload.php';
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+function base64url_decode($data) {
+    return base64_decode(strtr($data, '-_', '+/'));
+}
+
+function verifySimpleJWT($token, $secret) {
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return null;
+    list($header64, $payload64, $signature) = $parts;
+    $expectedSignature = hash_hmac('sha256', $header64 . "." . $payload64, $secret, true);
+    $expectedSignature64 = rtrim(strtr(base64_encode($expectedSignature), '+/', '-_'), '=');
+    if (!hash_equals($expectedSignature64, $signature)) return null;
+    $payload = json_decode(base64url_decode($payload64), true);
+    if ($payload && isset($payload['exp']) && $payload['exp'] < time()) return null;
+    return $payload;
+}
 
 function validateName($name) {
     $name = trim($name);
+    if (empty($name)) return false;
     if (preg_match('/^[а-яА-ЯёЁ]+$/u', $name)) return true;
     if (preg_match('/^[a-zA-Z]+$/', $name)) return true;
     return false;
@@ -21,14 +34,16 @@ if (!preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
 }
 $token = $matches[1];
 $secret = getenv('JWT_SECRET');
-try {
-    $decoded = JWT::decode($token, new Key($secret, 'HS256'));
-    $userId = $decoded->user_id;
-} catch (Exception $e) {
+if (!$secret) {
+    $secret = 'it-is-the-most-top-secret-key-from-Epstein-s-files';
+}
+$decoded = verifySimpleJWT($token, $secret);
+if (!$decoded || !isset($decoded['user_id'])) {
     http_response_code(401);
     echo json_encode(['error' => 'invalid_token']);
     exit;
 }
+$userId = $decoded['user_id'];
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -79,7 +94,6 @@ if ($method === 'GET') {
         $stmt = $pdo->prepare("UPDATE users SET name = ?, birthdate = ?, comment = ?, updated_at = NOW() WHERE id = ?");
         $stmt->execute([$name, $birthdate, $comment ?: null, $userId]);
 
-        // Обновляем связи
         $stmt = $pdo->prepare("DELETE FROM users_drivers WHERE user_id = ?");
         $stmt->execute([$userId]);
         $driverStmt = $pdo->prepare("INSERT INTO users_drivers (user_id, driver_id) VALUES (?, (SELECT id FROM drivers WHERE name = ?))");
@@ -94,3 +108,4 @@ if ($method === 'GET') {
         echo json_encode(['error' => 'update_failed']);
     }
 }
+?>
