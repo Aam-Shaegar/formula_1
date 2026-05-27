@@ -471,7 +471,7 @@
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/index.php'; });
 
-        // ---------- БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ----------
+        // ---------- БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ (горизонтальный скролл с ускорением) ----------
     async function initRacersFlow() {
         const track = document.getElementById('racersFlowTrack');
         if (!track) return;
@@ -479,60 +479,65 @@
         const totalRacers = 22;
         let html = '';
         
-        // Дублируем изображения для бесконечного эффекта (2 набора)
-        for (let repeat = 0; repeat < 2; repeat++) {
-            for (let i = 1; i <= totalRacers; i++) {
-                html += `<img src="./images/racers_flow/${i}.png" alt="Гонщик ${i}" loading="lazy" onerror="this.style.opacity='0.5'">`;
-            }
+        // Все картинки подряд (без дублирования, просто скролл)
+        for (let i = 1; i <= totalRacers; i++) {
+            html += `<img src="./images/racers_flow/${i}.png" alt="Гонщик ${i}" loading="lazy" onerror="this.style.opacity='0.5'; this.style.minWidth='200px';">`;
         }
         track.innerHTML = html;
         
         const container = document.querySelector('.racers-flow-container');
         if (!container) return;
         
-        // Скорость прокрутки колёсиком (на мобилке — свайп)
+        // Плавная прокрутка с инерцией
         let scrollSpeed = 0;
         let scrollInterval = null;
+        let lastTimestamp = 0;
         
         function smoothScroll() {
-            if (Math.abs(scrollSpeed) < 0.5) {
-                if (scrollInterval) clearInterval(scrollInterval);
-                scrollInterval = null;
+            if (Math.abs(scrollSpeed) < 0.3) {
+                if (scrollInterval) {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                }
                 return;
             }
             container.scrollLeft += scrollSpeed;
-            scrollSpeed *= 0.95; // затухание
+            scrollSpeed *= 0.96; // затухание
         }
         
         container.addEventListener('wheel', (e) => {
             e.preventDefault();
-            scrollSpeed += e.deltaY * 0.5;
+            // Увеличиваем влияние колесика
+            scrollSpeed += e.deltaY * 0.8;
             if (!scrollInterval) {
                 scrollInterval = setInterval(smoothScroll, 16);
             }
         }, { passive: false });
         
-        // Для мобильных — обычный свайп (скролл работает по умолчанию)
-        // Дополнительно: анимация автоматического движения, если не взаимодействуют
+        // Для мобильных: обычный свайп работает через overflow-x: auto
+        // Дополнительно: небольшая автоматическая прокрутка, если не взаимодействуют (опционально, можно отключить)
         let autoScrollInterval;
         let isUserInteracting = false;
         
         function startAutoScroll() {
             if (autoScrollInterval) clearInterval(autoScrollInterval);
             autoScrollInterval = setInterval(() => {
-                if (!isUserInteracting && container.scrollLeft < container.scrollWidth / 2) {
-                    container.scrollLeft += 2;
-                } else if (!isUserInteracting && container.scrollLeft >= container.scrollWidth / 2) {
-                    container.scrollLeft = 0;
+                if (!isUserInteracting) {
+                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+                        container.scrollLeft = 0;
+                    } else {
+                        container.scrollLeft += 1.5;
+                    }
                 }
-            }, 30);
+            }, 40);
         }
         
         container.addEventListener('mouseenter', () => { isUserInteracting = true; });
         container.addEventListener('mouseleave', () => { isUserInteracting = false; });
         container.addEventListener('touchstart', () => { isUserInteracting = true; });
-        container.addEventListener('touchend', () => { setTimeout(() => { isUserInteracting = false; }, 1000); });
+        container.addEventListener('touchend', () => { setTimeout(() => { isUserInteracting = false; }, 1500); });
         
+        // Запускаем автоскролл (можно закомментировать, если не нужно)
         startAutoScroll();
     }
     

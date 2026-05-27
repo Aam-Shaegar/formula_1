@@ -735,7 +735,7 @@ body {
     margin-top: 0.5rem;
 }
 
-/* ===== БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ===== */
+/* ===== БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ (горизонтальный скролл без CSS-анимации) ===== */
 .racers-flow-section {
     margin: 4rem auto 2rem;
     max-width: 1200px;
@@ -750,42 +750,37 @@ body {
     cursor: grab;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
 }
 .racers-flow-container:active {
     cursor: grabbing;
 }
 .racers-flow-track {
-    display: flex;
+    display: inline-flex;
     gap: 1rem;
-    width: max-content;
-    animation: racers-flow-scroll 25s linear infinite;
-}
-.racers-flow-track:hover {
-    animation-play-state: paused;
+    width: auto;
 }
 .racers-flow-track img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+    width: auto;
+    min-width: 620px;
+    max-width: 650px;
+    height: auto;
+    object-fit: contain;
     border-radius: 20px;
     border: 2px solid #e10600;
     transition: transform 0.2s;
     flex-shrink: 0;
+    background-color: #0b0b0b;
 }
 .racers-flow-track img:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
-@keyframes racers-flow-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-/* Ускоренная прокрутка колёсиком мыши */
 .racers-flow-container {
     scrollbar-width: thin;
     scrollbar-color: #e10600 #2a2a2a;
 }
 .racers-flow-container::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
 }
 .racers-flow-container::-webkit-scrollbar-track {
     background: #2a2a2a;
@@ -798,7 +793,7 @@ body {
 
 @media (max-width: 700px) {
     .racers-flow-track img {
-        width: 70px;
-        height: 70px;
+        min-width: 280px;
+        max-width: 320px;
     }
 }
