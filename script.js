@@ -295,9 +295,18 @@
 
     // ---------- НОВЫЙ ФРОНТЕНД: голосование, лента, форма ----------
     const driversList = [
-        "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Lando Norris",
-        "Carlos Sainz", "George Russell", "Sergio Pérez", "Fernando Alonso",
-        "Oscar Piastri", "Pierre Gasly", "Esteban Ocon", "Alexander Albon"
+        "George Russell",
+        "Kimi Antonelli",
+        "Charles Leclerc",
+        "Lewis Hamilton",
+        "Lando Norris",
+        "Oscar Piastri",
+        "Max Verstappen",
+        "Liam Lawson",
+        "Arvid Lindblad",
+        "Oliver Bearman",
+        "Carlos Sainz",
+        "Fernando Alonso"
     ];
 
     async function loadPoll() {
