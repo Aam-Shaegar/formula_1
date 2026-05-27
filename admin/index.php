@@ -1,7 +1,7 @@
 <?php
 require_once '../db.php';
 
-// Проверка через таблицу admin_credentials
+// Проверка через таблицу admins
 if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
     header('WWW-Authenticate: Basic realm="Admin Area"');
     http_response_code(401);
@@ -12,7 +12,7 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
 $login = $_SERVER['PHP_AUTH_USER'];
 $password = $_SERVER['PHP_AUTH_PW'];
 
-$stmt = $pdo->prepare("SELECT password_hash FROM admin_credentials WHERE name = ?");
+$stmt = $pdo->prepare("SELECT password_hash FROM admins WHERE username = ?");
 $stmt->execute([$login]);
 $admin = $stmt->fetch();
 
