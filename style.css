@@ -879,3 +879,7 @@ body {
 .user-form label:not(:first-of-type) {
     margin-top: 0.5rem;
 }
+/* Плавная прокрутка по якорям */
+html {
+    scroll-behavior: smooth;
+}
