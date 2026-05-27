@@ -751,7 +751,8 @@ body {
     scroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
-    scrollbar-width: none;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 .racers-flow-container:active {
     cursor: grabbing;
@@ -781,8 +782,9 @@ body {
     scrollbar-color: #e10600 #2a2a2a;
 }
 .racers-flow-container::-webkit-scrollbar {
-    display: none; /* Скрываем скроллбар в Chrome/Safari */
+    display: none; /* Chrome/Safari/Opera */
 }
+
 .racers-flow-container::-webkit-scrollbar-track {
     background: #2a2a2a;
     border-radius: 10px;

@@ -471,16 +471,15 @@
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/index.php'; });
 
-    // ---------- БЕСКОНЕЧНАЯ БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ----------
+        // ---------- БЕСКОНЕЧНАЯ БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ----------
     async function initRacersFlow() {
         const track = document.getElementById('racersFlowTrack');
         if (!track) return;
         
         const totalRacers = 22;
-        const repeatCount = 5; // 5 копий для идеальной бесшовности
+        const repeatCount = 5;
         let html = '';
         
-        // Создаём 5 копий всех картинок подряд
         for (let repeat = 0; repeat < repeatCount; repeat++) {
             for (let i = 1; i <= totalRacers; i++) {
                 html += `<img src="./images/racers_flow/${i}.png" alt="Гонщик ${i}" loading="lazy" onerror="this.style.opacity='0.5'">`;
@@ -491,28 +490,24 @@
         const container = document.querySelector('.racers-flow-container');
         if (!container) return;
         
-        // Ждём загрузки хотя бы одной картинки, чтобы узнать ширину
         let imageWidth = 650;
         let gap = 16;
         let setWidth = totalRacers * (imageWidth + gap);
         
-        // Примерная ширина (пересчитаем после загрузки)
         setTimeout(() => {
             const firstImg = track.querySelector('img');
             if (firstImg) {
                 imageWidth = firstImg.clientWidth;
                 setWidth = totalRacers * (imageWidth + gap);
-                // Ставим позицию на 2 копии от начала
                 container.scrollLeft = setWidth * 2;
             }
         }, 100);
         
-        // Плавная прокрутка с инерцией и бесконечным циклом
         let scrollSpeed = 0;
         let scrollInterval = null;
         
         function smoothScroll() {
-            if (Math.abs(scrollSpeed) < 0.2) {
+            if (Math.abs(scrollSpeed) < 0.05) {
                 if (scrollInterval) {
                     clearInterval(scrollInterval);
                     scrollInterval = null;
@@ -523,7 +518,6 @@
             let newScrollLeft = container.scrollLeft + scrollSpeed;
             const maxScroll = container.scrollWidth - container.clientWidth;
             
-            // Бесконечный цикл: перебрасываем между копиями незаметно
             if (newScrollLeft <= setWidth) {
                 newScrollLeft = maxScroll - setWidth * 2;
                 container.scrollLeft = newScrollLeft;
@@ -534,18 +528,19 @@
                 container.scrollLeft = newScrollLeft;
             }
             
-            scrollSpeed *= 0.97;
+            scrollSpeed *= 0.96;
         }
         
+        // Чувствительность колесика сильно уменьшена
         container.addEventListener('wheel', (e) => {
             e.preventDefault();
-            scrollSpeed += e.deltaY * 1.2;
+            scrollSpeed += e.deltaY * 0.25; // было 1.2, теперь 0.25 – плавно
             if (!scrollInterval) {
                 scrollInterval = setInterval(smoothScroll, 16);
             }
         }, { passive: false });
         
-        // Автоматическая прокрутка (без полосы снизу)
+        // Автоскролл ускорен
         let autoScrollInterval;
         let isUserInteracting = false;
         
@@ -553,7 +548,7 @@
             if (autoScrollInterval) clearInterval(autoScrollInterval);
             autoScrollInterval = setInterval(() => {
                 if (!isUserInteracting) {
-                    let newLeft = container.scrollLeft + 1.8;
+                    let newLeft = container.scrollLeft + 3.5; // было 1.8, теперь 3.5 – быстрее
                     const maxScroll = container.scrollWidth - container.clientWidth;
                     
                     if (newLeft >= maxScroll - setWidth) {
@@ -574,7 +569,6 @@
         
         startAutoScroll();
     }
-    
     // Запускаем ленту гонщиков
     initRacersFlow();
 
