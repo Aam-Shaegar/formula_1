@@ -476,7 +476,7 @@
         const track = document.getElementById('racersFlowTrack');
         if (!track) return;
         
-        const totalRacers = 22;
+        const totalRacers = 12; // ← ИСПРАВЛЕНО: было 22, стало 12
         const repeatCount = 5;
         let html = '';
         
@@ -531,16 +531,14 @@
             scrollSpeed *= 0.96;
         }
         
-        // Чувствительность колесика сильно уменьшена
         container.addEventListener('wheel', (e) => {
             e.preventDefault();
-            scrollSpeed += e.deltaY * 0.25; // было 1.2, теперь 0.25 – плавно
+            scrollSpeed += e.deltaY * 0.25;
             if (!scrollInterval) {
                 scrollInterval = setInterval(smoothScroll, 16);
             }
         }, { passive: false });
         
-        // Автоскролл ускорен
         let autoScrollInterval;
         let isUserInteracting = false;
         
@@ -548,7 +546,7 @@
             if (autoScrollInterval) clearInterval(autoScrollInterval);
             autoScrollInterval = setInterval(() => {
                 if (!isUserInteracting) {
-                    let newLeft = container.scrollLeft + 3.5; // было 1.8, теперь 3.5 – быстрее
+                    let newLeft = container.scrollLeft + 3.5;
                     const maxScroll = container.scrollWidth - container.clientWidth;
                     
                     if (newLeft >= maxScroll - setWidth) {
