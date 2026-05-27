@@ -470,4 +470,74 @@
     if (profileBtn) profileBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'login.html'; });
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/index.php'; });
+
+        // ---------- БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ----------
+    async function initRacersFlow() {
+        const track = document.getElementById('racersFlowTrack');
+        if (!track) return;
+        
+        const totalRacers = 22;
+        let html = '';
+        
+        // Дублируем изображения для бесконечного эффекта (2 набора)
+        for (let repeat = 0; repeat < 2; repeat++) {
+            for (let i = 1; i <= totalRacers; i++) {
+                html += `<img src="./images/racers_flow/${i}.png" alt="Гонщик ${i}" loading="lazy" onerror="this.style.opacity='0.5'">`;
+            }
+        }
+        track.innerHTML = html;
+        
+        const container = document.querySelector('.racers-flow-container');
+        if (!container) return;
+        
+        // Скорость прокрутки колёсиком (на мобилке — свайп)
+        let scrollSpeed = 0;
+        let scrollInterval = null;
+        
+        function smoothScroll() {
+            if (Math.abs(scrollSpeed) < 0.5) {
+                if (scrollInterval) clearInterval(scrollInterval);
+                scrollInterval = null;
+                return;
+            }
+            container.scrollLeft += scrollSpeed;
+            scrollSpeed *= 0.95; // затухание
+        }
+        
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            scrollSpeed += e.deltaY * 0.5;
+            if (!scrollInterval) {
+                scrollInterval = setInterval(smoothScroll, 16);
+            }
+        }, { passive: false });
+        
+        // Для мобильных — обычный свайп (скролл работает по умолчанию)
+        // Дополнительно: анимация автоматического движения, если не взаимодействуют
+        let autoScrollInterval;
+        let isUserInteracting = false;
+        
+        function startAutoScroll() {
+            if (autoScrollInterval) clearInterval(autoScrollInterval);
+            autoScrollInterval = setInterval(() => {
+                if (!isUserInteracting && container.scrollLeft < container.scrollWidth / 2) {
+                    container.scrollLeft += 2;
+                } else if (!isUserInteracting && container.scrollLeft >= container.scrollWidth / 2) {
+                    container.scrollLeft = 0;
+                }
+            }, 30);
+        }
+        
+        container.addEventListener('mouseenter', () => { isUserInteracting = true; });
+        container.addEventListener('mouseleave', () => { isUserInteracting = false; });
+        container.addEventListener('touchstart', () => { isUserInteracting = true; });
+        container.addEventListener('touchend', () => { setTimeout(() => { isUserInteracting = false; }, 1000); });
+        
+        startAutoScroll();
+    }
+    
+    // Запускаем ленту гонщиков
+    initRacersFlow();
+
+
 })();

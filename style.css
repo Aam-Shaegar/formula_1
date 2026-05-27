@@ -734,3 +734,71 @@ body {
     padding: 0.9rem;
     margin-top: 0.5rem;
 }
+
+/* ===== БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ===== */
+.racers-flow-section {
+    margin: 4rem auto 2rem;
+    max-width: 1200px;
+    padding: 0 1rem;
+}
+.racers-flow-container {
+    background: rgba(10, 10, 10, 0.5);
+    border-radius: 28px;
+    padding: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    cursor: grab;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+.racers-flow-container:active {
+    cursor: grabbing;
+}
+.racers-flow-track {
+    display: flex;
+    gap: 1rem;
+    width: max-content;
+    animation: racers-flow-scroll 25s linear infinite;
+}
+.racers-flow-track:hover {
+    animation-play-state: paused;
+}
+.racers-flow-track img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 20px;
+    border: 2px solid #e10600;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+.racers-flow-track img:hover {
+    transform: scale(1.05);
+}
+@keyframes racers-flow-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+/* Ускоренная прокрутка колёсиком мыши */
+.racers-flow-container {
+    scrollbar-width: thin;
+    scrollbar-color: #e10600 #2a2a2a;
+}
+.racers-flow-container::-webkit-scrollbar {
+    height: 6px;
+}
+.racers-flow-container::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 10px;
+}
+.racers-flow-container::-webkit-scrollbar-thumb {
+    background: #e10600;
+    border-radius: 10px;
+}
+
+@media (max-width: 700px) {
+    .racers-flow-track img {
+        width: 70px;
+        height: 70px;
+    }
+}
