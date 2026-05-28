@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в админ-панель</title>
+    <style>
+        body {
+            background: #0b0b0b;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 32px;
+            width: 340px;
+            text-align: center;
+            border: 1px solid rgba(225, 6, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        h2 {
+            color: #e10600;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 40px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #e10600;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #e10600;
+            border: none;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #ff2e1c;
+        }
+        .error {
+            color: #ff6666;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        .back-link:hover {
+            color: #e10600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Вход в админку</h2>
+        <div id="error" class="error"></div>
+        <input type="text" id="username" placeholder="Логин" autocomplete="off">
+        <input type="password" id="password" placeholder="Пароль">
+        <button id="loginBtn">Войти</button>
+        <a href="../index.html" class="back-link">← На главную</a>
+    </div>
+
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error');
+
+            if (!username || !password) {
+                errorDiv.innerText = 'Заполните все поля';
+                return;
+            }
+
+            try {
+                const res = await fetch('login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    window.location.href = 'index.php';
+                } else {
+                    errorDiv.innerText = data.error || 'Ошибка входа';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Ошибка соединения с сервером';
+            }
+        });
+    </script>
+</body>
+</html>

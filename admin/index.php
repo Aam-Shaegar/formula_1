@@ -1,19 +1,18 @@
 <?php
 session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: login.html');
     exit;
 }
 require_once __DIR__ . '/../db.php';
 
 $comments = $pdo->query("SELECT id, name, email, comment, updated_at FROM users WHERE comment IS NOT NULL ORDER BY updated_at DESC")->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Админка</title>
+    <title>Админ-панель</title>
     <style>
         body { background: #0b0b0b; font-family: Arial; padding: 20px; color: white; }
         h1 { color: #e10600; }
