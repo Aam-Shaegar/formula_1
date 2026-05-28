@@ -482,7 +482,7 @@
 
         // ---------- БЕСКОНЕЧНАЯ БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ----------
     async function initRacersFlow() {
-        const track = document.getElementById('racersFlowTrack');
+        const track = document.getElementById('racersFlowTrack');ß
         if (!track) return;
         
         const totalRacers = 12; // ← ИСПРАВЛЕНО: было 22, стало 12

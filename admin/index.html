@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+    <style>
+        body { background: #0b0b0b; font-family: Arial; padding: 20px; color: white; }
+        h1 { color: #e10600; }
+        .comment { background: #1a1a1a; margin: 10px 0; padding: 10px; border-radius: 10px; }
+        textarea { width: 100%; background: #333; color: white; border: none; padding: 5px; }
+        button { background: #e10600; border: none; padding: 5px 10px; color: white; cursor: pointer; margin-top: 5px; }
+        .logout { margin-bottom: 20px; display: inline-block; background: #333; padding: 5px 10px; border-radius: 5px; text-decoration: none; color: white; }
+        .logout:hover { background: #e10600; }
+    </style>
+</head>
+<body>
+    <a href="logout.php" class="logout">Выйти</a>
+    <h1>Комментарии пользователей</h1>
+    <div id="comments-list">Загрузка...</div>
+
+    <script>
+        async function loadComments() {
+            try {
+                const res = await fetch('get_comments.php');
+                const comments = await res.json();
+                const container = document.getElementById('comments-list');
+                
+                if (!comments.length) {
+                    container.innerHTML = 'Нет комментариев';
+                    return;
+                }
+                
+                container.innerHTML = comments.map(c => `
+                    <div class="comment" data-id="${c.id}">
+                        <strong>${escapeHtml(c.name)}</strong> (${escapeHtml(c.email)})<br>
+                        <textarea id="comment-${c.id}">${escapeHtml(c.comment)}</textarea><br>
+                        <button onclick="updateComment(${c.id})">Сохранить</button>
+                        <button onclick="deleteComment(${c.id})">Удалить</button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                document.getElementById('comments-list').innerHTML = 'Ошибка загрузки комментариев';
+            }
+        }
+        
+        async function updateComment(id) {
+            const comment = document.getElementById(`comment-${id}`).value;
+            await fetch('update_comment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, comment })
+            });
+            loadComments();
+        }
+        
+        async function deleteComment(id) {
+            if (confirm('Удалить комментарий?')) {
+                await fetch('delete_comment.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                loadComments();
+            }
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        loadComments();
+    </script>
+</body>
+</html>
