@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { background: #0b0b0b; font-family: Arial; padding: 20px; color: white; }
+        h1 { color: #e10600; }
+        .comment-box { border: 1px solid #333; margin: 10px 0; padding: 10px; border-radius: 10px; background: #1a1a1a; }
+        textarea { width: 100%; background: #2a2a2a; border: none; color: white; padding: 10px; border-radius: 8px; }
+        button { background: #e10600; border: none; padding: 5px 15px; color: white; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+        .logout { margin-bottom: 20px; }
+        .logout a { color: #ff6666; text-decoration: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="logout">
+        <a id="logoutBtn">Logout</a>
+    </div>
+    <h1>Comments Management</h1>
+    <div id="comments-list"></div>
+    <script>
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        async function loadComments() {
+            const res = await fetch('/api/admin_comments.php', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const comments = await res.json();
+            const container = document.getElementById('comments-list');
+            container.innerHTML = comments.map(c => `
+                <div class="comment-box">
+                    <strong>${escapeHtml(c.name)}</strong> (${escapeHtml(c.email)})<br>
+                    <textarea id="comment-${c.id}">${escapeHtml(c.comment)}</textarea><br>
+                    <button onclick="updateComment(${c.id})">Save</button>
+                    <button onclick="deleteComment(${c.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+        
+        async function updateComment(id) {
+            const comment = document.getElementById(`comment-${id}`).value;
+            await fetch('/api/admin_update_comment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ id, comment })
+            });
+            loadComments();
+        }
+        
+        async function deleteComment(id) {
+            if(confirm('Delete this comment?')) {
+                await fetch('/api/admin_delete_comment.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ id })
+                });
+                loadComments();
+            }
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('admin_token');
+            window.location.href = 'login.html';
+        });
+        
+        function escapeHtml(str) { 
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) { 
+                if(m==='&') return '&amp;'; 
+                if(m==='<') return '&lt;'; 
+                if(m==='>') return '&gt;'; 
+                return m; 
+            }); 
+        }
+        
+        loadComments();
+    </script>
+</body>
+</html>
