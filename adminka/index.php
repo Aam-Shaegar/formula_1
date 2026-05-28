@@ -9,7 +9,7 @@ require_once '../db.php';
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Админка F1</title>
+    <title>Admin Panel</title>
     <meta charset="UTF-8">
     <style>
         body { background: #0b0b0b; font-family: Arial; padding: 20px; color: white; }
@@ -18,14 +18,14 @@ require_once '../db.php';
         textarea { width: 100%; background: #2a2a2a; border: none; color: white; padding: 10px; border-radius: 8px; }
         button { background: #e10600; border: none; padding: 5px 15px; color: white; border-radius: 5px; cursor: pointer; margin-right: 10px; }
         .logout { margin-bottom: 20px; }
-        .logout a { color: #ff6666; }
+        .logout a { color: #ff6666; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="logout">
-        <a href="logout.php">🚪 Выйти из админки</a>
+        <a href="logout.php">Logout</a>
     </div>
-    <h1>📝 Управление комментариями</h1>
+    <h1>Comments Management</h1>
     <div id="comments-list"></div>
     <script>
     async function loadComments() {
@@ -36,8 +36,8 @@ require_once '../db.php';
             <div class="comment-box">
                 <strong>${escapeHtml(c.name)}</strong> (${escapeHtml(c.email)})<br>
                 <textarea id="comment-${c.id}">${escapeHtml(c.comment)}</textarea><br>
-                <button onclick="updateComment(${c.id})">💾 Сохранить</button>
-                <button onclick="deleteComment(${c.id})">🗑 Удалить</button>
+                <button onclick="updateComment(${c.id})">Save</button>
+                <button onclick="deleteComment(${c.id})">Delete</button>
             </div>
         `).join('');
     }
@@ -51,7 +51,7 @@ require_once '../db.php';
         loadComments();
     }
     async function deleteComment(id) {
-        if(confirm('Удалить комментарий?')) {
+        if(confirm('Delete this comment?')) {
             await fetch('/api/admin/delete_comment.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},

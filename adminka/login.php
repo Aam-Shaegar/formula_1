@@ -17,14 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: index.php');
         exit;
     } else {
-        $error = 'Неверный логин или пароль';
+        $error = 'Invalid login or password';
     }
 }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Вход в админку</title>
+    <title>Admin Login</title>
     <meta charset="UTF-8">
     <style>
         body { background: #0b0b0b; font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; }
@@ -37,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="login-box">
-        <h2>🔐 Вход в админку</h2>
+        <h2>Admin Login</h2>
         <?php if ($error): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <form method="POST">
-            <input type="text" name="username" placeholder="Логин" required>
-            <input type="password" name="password" placeholder="Пароль" required>
-            <button type="submit">Войти</button>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
         </form>
     </div>
 </body>
