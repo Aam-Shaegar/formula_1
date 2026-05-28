@@ -1,8 +1,6 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 session_start();
-require_once '../db.php';
+require_once __DIR__ . '/../db.php';
 
 $error = '';
 
@@ -10,16 +8,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
     
-    $stmt = $pdo->prepare("SELECT password_hash FROM admins WHERE username = ?");
+    // Прямой запрос для проверки
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
     $stmt->execute([$username]);
-    $admin = $stmt->fetch();
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($admin && password_verify($password, $admin['password_hash'])) {
-        $_SESSION['admin_logged_in'] = true;
-        header('Location: index.php');
-        exit;
+    if ($admin) {
+        if (password_verify($password, $admin['password_hash'])) {
+            $_SESSION['admin_logged_in'] = true;
+            header('Location: index.php');
+            exit;
+        } else {
+            $error = 'Неверный пароль';
+        }
     } else {
-        $error = 'Неверный логин или пароль';
+        $error = 'Пользователь не найден';
     }
 }
 ?>
