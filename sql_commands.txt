@@ -52,3 +52,5 @@ INSERT INTO admin_credentials (name, password_hash) VALUES ('admin', '$2y$10$92I
 vT82F4YDEq
 
 bRUgmhwFSc
+
+$2y$10$VmG2hbQVAOX8uhJnUHq2UuM7Ls75xpXS0KfB1AT1dYC1/c95S8F5K
