@@ -478,7 +478,7 @@
     const profileBtn = document.getElementById('myProfileBtn');
     if (profileBtn) profileBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'login.html'; });
     const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/login.php'; });
+    if (adminBtn) adminBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'admin/login.html'; });
 
         // ---------- БЕСКОНЕЧНАЯ БЕГУЩАЯ ЛЕНТА ИЗОБРАЖЕНИЙ ГОНЩИКОВ ----------
     async function initRacersFlow() {
