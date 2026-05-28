@@ -1,26 +1,51 @@
 <?php
 session_start();
+require_once __DIR__ . '/../db.php';
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
     
-    echo "Username: $username, Password: $password";
-    exit;
+    $stmt = $pdo->prepare("SELECT password_hash FROM admins WHERE username = ?");
+    $stmt->execute([$username]);
+    $admin = $stmt->fetch();
+    
+    if ($admin && password_verify($password, $admin['password_hash'])) {
+        $_SESSION['admin_logged_in'] = true;
+        header('Location: index.php');
+        exit;
+    } else {
+        $error = 'Invalid login or password';
+    }
 }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Login Test</title>
+    <title>Admin Login</title>
     <meta charset="UTF-8">
+    <style>
+        body { background: #0b0b0b; font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: #1a1a1a; padding: 2rem; border-radius: 20px; width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; background: #333; border: none; color: white; border-radius: 8px; }
+        button { background: #e10600; border: none; padding: 10px; width: 100%; color: white; border-radius: 8px; cursor: pointer; }
+        .error { color: #ff6666; }
+        h2 { color: white; }
+    </style>
 </head>
 <body>
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        <?php if ($error): ?>
+            <div class="error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
 </body>
 </html>
